@@ -2,39 +2,17 @@
     Contains the lexical analyzer and parser which obtains
     the tokens and determines the syntax of the Java input.
  */
+
 import java.io.*;
 
 import static java.lang.Character.isWhitespace;
 
 public class Interpreter {
-    public Interpreter() throws FileNotFoundException {
-    }
-
-    //Global variables
-    static int currentChar;
-    static int charClass;
-    static int lexCounter = 0;
-//    static char lexeme[] = new char[100];
-    static String lexeme;
-    static FileReader reader;
-    static int token;
-
-    //Global scope for the file to be read in all methods
-    static {
-        try {
-            reader = new FileReader("inputFile.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-    static BufferedReader buffReader = new BufferedReader(reader);
-
     //Character classes
     static final int LETTER = 0;
     static final int DIGIT = 1;
     static final int OTHER = 99;
     static final int EOF = -1;
-
     //Token codes
     static final int IDENTIFIER = 2;
     static final int INTEGER = 3;
@@ -46,31 +24,44 @@ public class Interpreter {
     static final int SUB_OP = 9;
     static final int DIV_OP = 10;
     static final int MULT_OP = 11;
+    //Global variables
+    static int currentChar;
+    static int charClass;
+    static int lexCounter = 0;
+    static String lexeme;
+    static FileReader reader;
+    static int token;
+    static BufferedReader buffReader = new BufferedReader(reader);
 
-
-
-
+    //Global scope for the file to be read in all methods
+    static {
+        try {
+            reader = new FileReader("inputFile.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    public Interpreter() throws FileNotFoundException {
+    }
 
     /* Lexer functions
-       The functions lexer() and getChar() are responsible for collecting lexemes
-       and determining tokens.
+       The functions lexer() and getChar() are responsible for collecting chars,
+       assigning chars to the classes and determining tokens.
      */
-
-    //addChar() -- Adds gathered chars to the lexeme being built
+    //getNonBlank() -- pull chars until a non-white space is obtained
     static void getNonBlank() throws IOException {
-        while (isWhitespace(currentChar)){
+        while (isWhitespace(currentChar)) {
             currentChar = buffReader.read();
         }
     }
+
     //addChar() -- Adds the current char to the lexeme being built
-    static void addChar(){
-//        lexeme[lexCounter] = (char)currentChar;
-//        lexCounter++;
+    static void addChar() {
         lexeme += currentChar;
     }
 
     //lookup() -- Called to obtain a token for special symbols such as operators and braces.
-    static void lookup(){
+    static void lookup() {
         switch (currentChar) {
             case '=' -> token = ASSIGN_OP;
             case ';' -> token = SEMI_COLON;
@@ -83,21 +74,19 @@ public class Interpreter {
 
     //getChar() -- Retrieves the next character in an input file and identifies its class.
     static void getChar() throws IOException {
-            currentChar = buffReader.read();
+        currentChar = buffReader.read();
 
-            if (currentChar != EOF) {
-                if (Character.isDigit(currentChar))
-                    charClass = LETTER;
-                else if (Character.isLetter(currentChar))
-                    charClass = DIGIT;
-                else charClass = OTHER;
-            } else charClass = EOF;
+        if (currentChar != EOF) {
+            if (Character.isDigit(currentChar))
+                charClass = LETTER;
+            else if (Character.isLetter(currentChar))
+                charClass = DIGIT;
+            else charClass = OTHER;
+        } else charClass = EOF;
 
-            System.out.println("Char pulled: " + (char) currentChar);
-            System.out.println("Class of that char: " + charClass);
+        System.out.println("Char pulled: " + (char) currentChar);
+        System.out.println("Class of that char: " + charClass);
     }
-
-
 
     //lexer() -- Determines a token based upon the lexeme it is building.
     static int lexer() throws IOException {
@@ -105,28 +94,27 @@ public class Interpreter {
         lexeme = "";
         addChar();
 
-        switch(charClass){
+        switch (charClass) {
             case DIGIT:
-                //A condition must still be added that accounts for decimals.
+                //A condition must still be added that accounts for decimal numbers.
                 token = INTEGER;
-                while(isWhitespace(currentChar) == false){
+                while (isWhitespace(currentChar) == false) {
                     getChar();
-                    if(isWhitespace(currentChar))
+                    if (isWhitespace(currentChar))
                         return token;
                     addChar();
                 }
                 break;
 
             case LETTER:
-                while(isWhitespace(currentChar) == false){
-                    if(lexeme == "if"){
+                while (isWhitespace(currentChar) == false) {
+                    if (lexeme == "if") {
                         return token = IF;
-                    }
-                    else if(lexeme == "while") {
+                    } else if (lexeme == "while") {
                         return token = WHILE;
                     }
                     getChar();
-                    if (isWhitespace(currentChar)){
+                    if (isWhitespace(currentChar)) {
                         return token = IDENTIFIER;
                     }
                     addChar();
@@ -143,17 +131,28 @@ public class Interpreter {
     }
 
 
-
     /* Parser functions
        The following functions are grammar rules which create a parse tree denoting
        the correct syntax of the input.
      */
-    static void stmt_list(){};
-    static void stmt(){};
-    static void expr(){};
-    static void term(){};
-    static void declaration_stmt(){};
-    static void assignment_stmt(){};
+    static void stmt_list() {
+    }
+
+    static void stmt() {
+    }
+
+    static void expr() {
+    }
+
+    static void term() {
+    }
+
+    static void declaration_stmt() {
+    }
+
+    static void assignment_stmt() {
+    }
+
     public static void main(String[] args) throws IOException {
         getChar();
         lexer();
