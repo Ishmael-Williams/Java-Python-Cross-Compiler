@@ -47,10 +47,6 @@ public class Interpreter {
     static final int DIV_OP = 10;
     static final int MULT_OP = 11;
 
-
-
-
-
     /* Lexer functions
        The functions lexer() and getChar() are responsible for collecting lexemes
        and determining tokens.
