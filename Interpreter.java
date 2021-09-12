@@ -1,6 +1,22 @@
 /*
     Contains the lexical analyzer and parser which obtains
     the tokens and determines the syntax of the Java input.
+    The grammar rules are examples and will be changed to the
+    rules that Java behaves by.
+
+    functions:
+        lexer and tokenizer functions
+            getNonBlank() -- Pulls chars from the input file until a non-whitespace is encountered.
+            addChar()     -- Adds the current char to the lexeme being built.
+            lookup()      -- Obtains the token for special symbols such as operators and braces.
+            getChar()     -- Retrieves the next character in an input file and identifies its class.
+            lexer()       -- Builds a lexeme and determines its token.
+
+        parser functions (grammar rules)
+            stmt_list()   -- <stmt>{stmt}
+            stmt()        -- <assignment> | <flow_ctrl_stmt> | <declaration>
+            expr()        -- <term>{(+ | -) <term>}
+            term()        -- <factor>{(* | /) <factor>}
  */
 
 import java.io.*;
@@ -28,13 +44,12 @@ public class Interpreter {
     //Global variables
     static int currentChar;
     static int charClass;
-    static int lexCounter = 0;
     static String lexeme;
     static FileReader reader;
     static int token;
-    static BufferedReader buffReader = new BufferedReader(reader);
 
-    //Global scope for the file to be read in all methods
+
+    //Global scope for the file used in this class
     static {
         try {
             reader = new FileReader("inputFile.txt");
@@ -42,26 +57,22 @@ public class Interpreter {
             e.printStackTrace();
         }
     }
+    static BufferedReader buffReader = new BufferedReader(reader);
+
     public Interpreter() throws FileNotFoundException {
     }
 
-    /* Lexer functions
-       The functions lexer() and getChar() are responsible for collecting lexemes
-       and determining tokens.
-     */
-    //getNonBlank() -- pulls chars from the input file until a non-whitespace is encountered.
+
     static void getNonBlank() throws IOException {
         while (isWhitespace(currentChar)) {
             currentChar = buffReader.read();
         }
     }
 
-    //addChar() -- Adds the current char to the lexeme being built.
     static void addChar() {
         lexeme += currentChar;
     }
 
-    //lookup() -- Called to obtain a token for special symbols such as operators and braces.
     static void lookup() {
         switch (currentChar) {
             case '=' -> token = ASSIGN_OP;
@@ -73,7 +84,6 @@ public class Interpreter {
         }
     }
 
-    //getChar() -- Retrieves the next character in an input file and identifies its class.
     static void getChar() throws IOException {
         currentChar = buffReader.read();
 
@@ -90,9 +100,7 @@ public class Interpreter {
     }
 
 
-    //lexer() -- Determines a token based upon the lexeme it is building.
     static int lexer() throws IOException {
-        lexCounter = 0;
         lexeme = "";
         addChar();
 
@@ -133,11 +141,10 @@ public class Interpreter {
     }
 
 
-    /* Parser functions
-       The following functions are grammar rules which create a parse tree denoting
-       the correct syntax of the input.
-     */
     static void stmt_list() {
+//        while (token != EOF) {
+//            stmt();
+//        }
     }
 
     static void stmt() {
@@ -149,16 +156,16 @@ public class Interpreter {
     static void term() {
     }
 
-    static void declaration_stmt() {
+    static void factor() {
+
     }
 
-    static void assignment_stmt() {
-    }
 
     public static void main(String[] args) throws IOException {
         getChar();
         lexer();
         stmt_list();
+        System.out.println("The current token is: " + token);
         reader.close();
         buffReader.close();
     }
