@@ -52,7 +52,7 @@ public class Interpreter {
     //Global scope for the file used in this class
     static {
         try {
-            reader = new FileReader("inputFile.txt");
+            reader = new FileReader("Test 1.txt");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -122,6 +122,8 @@ public class Interpreter {
                         return token = IF;
                     } else if (Objects.equals(lexeme, "while")) {
                         return token = WHILE;
+                    } else if (Objects.equals(lexeme, "int")) {
+                        return token = INTEGER;
                     }
                     getChar();
                     if (isWhitespace(currentChar)) {
