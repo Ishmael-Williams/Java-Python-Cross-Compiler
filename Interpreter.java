@@ -25,6 +25,9 @@ import java.util.Objects;
 import static java.lang.Character.isWhitespace;
 
 public class Interpreter {
+    public Interpreter() throws FileNotFoundException {
+    }
+
     //Character classes
     static final int LETTER = 0;
     static final int DIGIT = 1;
@@ -41,13 +44,13 @@ public class Interpreter {
     static final int SUB_OP = 9;
     static final int DIV_OP = 10;
     static final int MULT_OP = 11;
+    static final int DECLARATION = 12;
     //Global variables
     static int currentChar;
     static int charClass;
     static String lexeme;
     static FileReader reader;
     static int token;
-
 
     //Global scope for the file used in this class
     static {
@@ -57,10 +60,10 @@ public class Interpreter {
             e.printStackTrace();
         }
     }
+
     static BufferedReader buffReader = new BufferedReader(reader);
 
-    public Interpreter() throws FileNotFoundException {
-    }
+
 
 
     static void getNonBlank() throws IOException {
@@ -70,7 +73,7 @@ public class Interpreter {
     }
 
     static void addChar() {
-        lexeme += currentChar;
+        lexeme += (char) currentChar;
     }
 
     static void lookup() {
@@ -88,12 +91,13 @@ public class Interpreter {
         currentChar = buffReader.read();
 
         if (currentChar != EOF) {
-            if (Character.isDigit(currentChar))
+            if (Character.isLetter(currentChar))
                 charClass = LETTER;
-            else if (Character.isLetter(currentChar))
+            else if (Character.isDigit(currentChar))
                 charClass = DIGIT;
             else charClass = OTHER;
         } else charClass = EOF;
+
 
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass);
@@ -123,13 +127,14 @@ public class Interpreter {
                     } else if (Objects.equals(lexeme, "while")) {
                         return token = WHILE;
                     } else if (Objects.equals(lexeme, "int")) {
-                        return token = INTEGER;
+                        return token = DECLARATION;
                     }
                     getChar();
                     if (isWhitespace(currentChar)) {
                         return token = IDENTIFIER;
                     }
                     addChar();
+                    System.out.println("Current lexeme: " + lexeme);
                 }
                 break;
 
@@ -164,10 +169,14 @@ public class Interpreter {
 
 
     public static void main(String[] args) throws IOException {
-        getChar();
-        lexer();
-        stmt_list();
-        System.out.println("The current token is: " + token);
+
+        while (currentChar != -1) {
+            getChar();
+            lexer();
+            stmt_list();
+            System.out.println("The current token is: " + token + "\n");
+
+        }
         reader.close();
         buffReader.close();
     }
