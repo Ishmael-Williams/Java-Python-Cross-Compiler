@@ -65,7 +65,7 @@ public class Interpreter {
 
 
 
-
+    /*  lexer and tokenizer functions   */
     static void getNonBlank() throws IOException {
         while (isWhitespace(currentChar)) {
             currentChar = buffReader.read();
@@ -74,17 +74,6 @@ public class Interpreter {
 
     static void addChar() {
         lexeme += (char) currentChar;
-    }
-
-    static void lookup() {
-        switch (currentChar) {
-            case '=' -> token = ASSIGN_OP;
-            case ';' -> token = SEMI_COLON;
-            case '+' -> token = ADD_OP;
-            case '-' -> token = SUB_OP;
-            case '/' -> token = DIV_OP;
-            case '*' -> token = MULT_OP;
-        }
     }
 
     static void getChar() throws IOException {
@@ -103,6 +92,16 @@ public class Interpreter {
         System.out.println("Class of that char: " + charClass);
     }
 
+    static void lookup() {
+        switch (currentChar) {
+            case '=' -> token = ASSIGN_OP;
+            case ';' -> token = SEMI_COLON;
+            case '+' -> token = ADD_OP;
+            case '-' -> token = SUB_OP;
+            case '/' -> token = DIV_OP;
+            case '*' -> token = MULT_OP;
+        }
+    }
 
     static int lexer() throws IOException {
         lexeme = "";
@@ -154,6 +153,7 @@ public class Interpreter {
 //        }
     }
 
+    /*  Parser functions  */
     static void stmt() {
     }
 
