@@ -65,7 +65,7 @@ public class Interpreter {
 
 
 
-    /*  lexer and tokenizer functions   */
+    /*  lexer functions for assigning classes and tokens   */
     static void getNonBlank() throws IOException {
         while (isWhitespace(currentChar)) {
             currentChar = buffReader.read();
@@ -153,7 +153,7 @@ public class Interpreter {
 //        }
     }
 
-    /*  Parser functions  */
+    /*  Parser functions for determining syntax through parse trees */
     static void stmt() {
     }
 
