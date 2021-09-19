@@ -31,6 +31,7 @@ public class Interpreter {
     //Character classes
     static final int LETTER = 0;
     static final int DIGIT = 1;
+    static final int SPACE = 98;
     static final int OTHER = 99;
     static final int EOF = -1;
     //Token codes
@@ -84,10 +85,13 @@ public class Interpreter {
                 charClass = LETTER;
             else if (Character.isDigit(currentChar))
                 charClass = DIGIT;
+            else if (isWhitespace(currentChar))
+                charClass = SPACE;
             else charClass = OTHER;
         } else charClass = EOF;
 
-
+        if (charClass == SPACE)
+            return;
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass);
     }
@@ -142,7 +146,6 @@ public class Interpreter {
                 break;
         }
 
-        getNonBlank();
         return token;
     }
 
