@@ -25,7 +25,9 @@ import java.util.Objects;
 import static java.lang.Character.isWhitespace;
 
 public class Interpreter {
-    public Interpreter() throws FileNotFoundException {
+    private static GUI gui;
+    public Interpreter(GUI gui){
+        this.gui = gui;
     }
 
     //Character classes
@@ -94,6 +96,13 @@ public class Interpreter {
             return;
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass);
+
+        gui.EP.appendText("Char pulled: " + (char) currentChar + "\n");
+        gui.EP.appendText("Class of that char: " + charClass + "\n");
+
+
+
+
     }
 
     static void lookup() {
@@ -138,6 +147,7 @@ public class Interpreter {
                     }
                     addChar();
                     System.out.println("Current lexeme: " + lexeme);
+                    gui.EP.appendText("Current lexeme: " + lexeme + "\n");
                 }
                 break;
 
@@ -170,7 +180,17 @@ public class Interpreter {
 
     }
 
-
+    public static void runInterpreter() throws IOException{
+        while (currentChar != -1) {
+            getChar();
+            lexer();
+            stmt_list();
+            System.out.println("The current token is: " + token + "\n");
+            gui.EP.appendText("The current token is: " + token + "\n\n");
+        }
+        reader.close();
+        buffReader.close();
+    }
     public static void main(String[] args) throws IOException {
 
         while (currentChar != -1) {
@@ -178,6 +198,7 @@ public class Interpreter {
             lexer();
             stmt_list();
             System.out.println("The current token is: " + token + "\n");
+            gui.EP.appendText("The current token is: " + token + "\n\n");
 
         }
         reader.close();
