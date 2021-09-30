@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
+import javafx.stage.FileChooser;
+
 
 import javafx.scene.control.TextArea;
 
@@ -93,12 +95,19 @@ public class GUI extends Application {
                 }
             }
         });
+
+        SJ.setOnAction(e -> {
+
+            SaveWindow sw = new SaveWindow();
+            sw.display(this);
+        });
     }
     public TextArea getTextArea(){
         return EJ;
     }
 
-
-
+    //Added these methods to return text data outside of GUI class (for saving)
+    public String getJavaText(){return EJ.getText();}
+    public String getPythonText(){return EP.getText(); }
 }
 
