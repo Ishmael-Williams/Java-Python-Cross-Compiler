@@ -22,7 +22,10 @@ public class GUI extends Application {
     public GUI() throws FileNotFoundException {
         Interpreter interpreter = new Interpreter(GUI.this);
     }
-    public static void main (String[] args){
+    public static void main (String[] args) throws IOException {
+//        args = new String[2];
+//        args[0] = "--module-path C:/Program Files/javafx-sdk-11.0.2/lib";
+//        args[1] = "--add-modules=javafx.controls,javafx.fxml";
         launch(args);
     }
 
