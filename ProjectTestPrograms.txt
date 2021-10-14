@@ -1,0 +1,85 @@
+public static void forLoop() 
+
+{ 
+
+int a; 
+
+int i; 
+
+for (i = 1; i < 8; i++) 
+
+a = i; 
+
+} 
+
+ 
+
+public static void ifStatement(int k) 
+
+{ 
+
+k = 1+2; 
+
+if (k > 2) 
+
+return k; 
+
+} 
+
+ 
+
+public static void ifElseStatement(int k) 
+
+{ 
+
+k = 2+2; 
+
+if (k > 3) 
+
+return k; 
+
+else 
+
+return 1; 
+
+} 
+
+ 
+
+public static void mathAssignment() 
+
+{ 
+
+int a = 5; 
+
+int b = 8; 
+
+int sum = a + b; 
+
+return sum; 
+
+} 
+
+ 
+
+Public static void elseIfAndPrintStatement() 
+
+{ 
+
+	double a = 6.7; 
+
+	double b = 9.1; 
+
+ 
+
+	If(a < b) 
+
+		return b; 
+
+	Else if (a > b) 
+
+		return a; 
+
+	system.out.println(“We have found the larger value!”); 
+
+} 
