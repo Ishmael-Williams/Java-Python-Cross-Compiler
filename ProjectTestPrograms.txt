@@ -1,85 +1,133 @@
-public static void forLoop() 
+Test Case Document:
+* This document defines a series of test cases that will be used to test the functionality and strength 
+of the Java-Python Cross Compiler. Cases will be listed in order of least to highest difficulty.
+* All Java components have been tested for validity and error-correction
 
-{ 
+--------------------------------------------------------------------------------------------------------
 
-int a; 
+Case 1 : Hello-World
+* Description - A simple java test program that prints the string "Hello World" to the console. 
+* Script : 
 
-int i; 
+public static void main(String[] args){
+	System.out.print("Hello World");
+}
 
-for (i = 1; i < 8; i++) 
+--------------------------------------------------------------------------------------------------------
+Case 2 : Variable Assignment
+* Description - Assignment of two public variables and printing them to show their assigned value.
+* Script :
 
-a = i; 
+public static void main(String[] args){
+	int x = 20;
+	int y = 21;
 
-} 
+	System.out.print("The value of variable x is : " + x + ", and the value of variable y is : " +
+	y + ".");
+}
 
- 
+--------------------------------------------------------------------------------------------------------
+Case 3 : For-Loop Print
+* Description - Implementation of a simple for-loop to increment the value of a publicly assigned variable,
+		that denotes the change in value after each increment is made.
+* Script :
 
-public static void ifStatement(int k) 
+public static void main(String[] args){
+	int x = 5;
+	System.out.print("The starting value of variable x is " + x);
 
-{ 
+	for(int i = 0 ; i < 3 ; i++){
+		x = x + 5;
+		System.out.print("\nIncrementation detected. New value of x is " + x);
+	}
+}
+--------------------------------------------------------------------------------------------------------
+Case 4 : User Input Operations
+* Description - User will enter two integer values. The system will user the implemented scanner to take
+		the two integer values and multiply them together, printing the result at the calculations
+		conclusion.
+* Script :
 
-k = 1+2; 
+import java.util.*;
+public static void main(String[] args){
+	Scanner scan = new Scanner(System.in);
 
-if (k > 2) 
+	System.out.print("Enter two integers to mutiply together.\nEnter integer 1 : ");
+	int x = scan.nextInt();
 
-return k; 
+	System.out.print("\nEnter integer 2 : ");
+	int y = scan.nextInt();
 
-} 
+	int result = x * y;
+	System.out.print("\nThe result of multiplying " + x + " * " + y + " equals " + result);
+}
+--------------------------------------------------------------------------------------------------------
+Case 5 : Fill-Print Array
+* Description - User will input a series of five integer values that will be stored in an array. Once
+		the user has completed this task, the system will send a confirmation and print the value
+		stored in the array and each index.
+* Script :
 
- 
+import java.util.*;
+public static void main(String[] args){
+	Scanner scan = new Scanner(System.in);
 
-public static void ifElseStatement(int k) 
+	int[] inputs = new int[5];
+	System.out.print("Please enter five integer values to fill your array : ");
+	for(int i = 0 ;  i < inputs.length ; i++){
+		inputs[i] = scan.nextInt();
+	}
 
-{ 
+	System.out.print("\nArray has been filled. Printing contents...");
+	for(int j = 0 ; j < inputs.length ; j++){
+		System.out.print("\nAt index " + j + ", the array contains a value of " + inputs[j]);
+	}
+}
 
-k = 2+2; 
+--------------------------------------------------------------------------------------------------------
+Case 6 : User Decision
+* Description - User chooses two values from the presented array and decides which operation they shall perform
+based on the choices presented to them. The picked operation will be printed on screen as well as the result.
+* Script :
 
-if (k > 3) 
+import java.util.*;
+public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
 
-return k; 
+        int[] samp = {1,2,3,4,5,6,7,8,9,10};
+        System.out.print("INDEX #: 0 1 2 3 4 5 6 7 8 9");
+        System.out.print("\n\t\t[");
+        for(int i = 0 ; i < samp.length ; i++){
+            if(i ==  9){
+                System.out.print(samp[i] + "]");
+            } else {
+                System.out.print(samp[i] + ",");
+            }
+        }
 
-else 
+        System.out.print("\nPlease select two values from the above array to " +
+                "perform an operation on based their index. \nSelect First Index: ");
+        int a = scan.nextInt();
+        int x = samp[a];
+        System.out.print("\nSelect Second Index: ");
+        int b = scan.nextInt();
+        int y = samp[b];
 
-return 1; 
 
-} 
-
- 
-
-public static void mathAssignment() 
-
-{ 
-
-int a = 5; 
-
-int b = 8; 
-
-int sum = a + b; 
-
-return sum; 
-
-} 
-
- 
-
-Public static void elseIfAndPrintStatement() 
-
-{ 
-
-	double a = 6.7; 
-
-	double b = 9.1; 
-
- 
-
-	If(a < b) 
-
-		return b; 
-
-	Else if (a > b) 
-
-		return a; 
-
-	system.out.println(“We have found the larger value!”); 
-
-} 
+        System.out.print("\nPlease select an operation to perform based on the number associated with each operation." +
+                "\n(0) Addition \n(1) Subtraction \n(2) Multiplication \n(3) Division \nOperation Choice: ");
+        int z = scan.nextInt();
+        if(z == 0){
+            int result = x + y;
+            System.out.print("\nThe result of " + x + " +  " + y + " equals " + result);
+        } else if (z == 1){
+            int result = x - y;
+            System.out.print("\nThe result of " + x + " -  " + y + " equals " + result);
+        } else if (z == 2){
+            int result = x * y;
+            System.out.print("\nThe result of " + x + " *  " + y + " equals " + result);
+        } else if (z == 3){
+            float result = (float) x / (float) y ;
+        System.out.print("\nThe result of " + x + " /  " + y + " equals " + result);
+    }
+}
