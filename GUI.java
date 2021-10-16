@@ -74,7 +74,7 @@ public class GUI extends Application {
         Scene scene = new Scene(root, 800, 650);
 
         //Statement to change current theme of application
-       // scene.getStylesheets().add("dark_mode.css");
+        scene.getStylesheets().add("dark_mode.css");
 
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -131,12 +131,6 @@ public class GUI extends Application {
                 isEdited = false; //File is up to date.
             }
         });
-
-//        SP.setOnAction(e -> {
-//
-//            SaveWindow sw = new SaveWindow();
-//            sw.display(this);
-//        });
 
         //Set flag whenever data in text areas is changed.
      EJ.textProperty().addListener((obs,old,niu) ->{

@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -54,6 +55,14 @@ public class SaveWindow extends Application{
                 if(pythonFile != null){
                     saveData(rootGUI.getPythonText(), pythonFile);
                 }
+            }
+
+            if(!javaData.isSelected() && !pythonData.isSelected()){
+                Alert saveError = new Alert(Alert.AlertType.ERROR);
+                saveError.setTitle("No Data Selected");
+                saveError.setContentText("No data was selected to save. " +
+                        "Please select at least one set of data to save.");
+                saveError.showAndWait();
             }
 
         });
