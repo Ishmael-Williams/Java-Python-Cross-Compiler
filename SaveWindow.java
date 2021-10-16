@@ -83,6 +83,7 @@ public class SaveWindow extends Application{
         Scene scene = new Scene(bp, 300, 100);
         stage.setTitle("Save Files");
         stage.setScene(scene);
+        //scene.getStylesheets().add("dark_mode.css");
         stage.show();
     }
 

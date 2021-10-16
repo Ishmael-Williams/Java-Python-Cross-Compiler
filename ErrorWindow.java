@@ -21,7 +21,7 @@ public class ErrorWindow extends Application {
 
     @Override
     public void start(Stage stage){
-        stage.setTitle("ERROR");
+        stage.setTitle("Error");
 
         BorderPane ePane = new BorderPane();
 
