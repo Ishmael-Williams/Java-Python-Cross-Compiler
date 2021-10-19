@@ -259,6 +259,7 @@ public class Interpreter {
 
     }
 
+
     public static void runInterpreter() throws IOException{
         cleanFile();
         getChar();
