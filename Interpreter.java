@@ -20,14 +20,23 @@
  */
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Objects;
-
 import static java.lang.Character.isWhitespace;
 
 public class Interpreter {
     private static GUI gui;
-    public Interpreter(GUI gui){
+
+    public Interpreter(GUI gui) {
         this.gui = gui;
+    }
+
+    static class tokenInfo {
+        tokens token;
+        String lexeme;
     }
 
     //Character classes
@@ -36,37 +45,41 @@ public class Interpreter {
     static final int SPACE = 98;
     static final int OTHER = 99;
     static final int EOF = -1;
+
     //Token codes
-    static final int IDENTIFIER = 2;
-    static final int INTEGER = 3;
-    static final int ASSIGN_OP = 4;
-    static final int SEMI_COLON = 5;
-    static final int IF = 6;
-    static final int WHILE = 7;
-    static final int ADD_OP = 8;
-    static final int SUB_OP = 9;
-    static final int DIV_OP = 10;
-    static final int MULT_OP = 11;
-    static final int DECLARATION = 12;
+
+    /*Special note on the "CALL" token:
+     * - It is defined for any lexeme that is followed by a period or parentheses.
+     * - For now, we ignore the complexity of a call, for example "System.out.print" is defined as a token for a single
+     *   call, and the meaning and relationship of "system", "out", and "print" are ignored.
+     *
+     * - Later we will capture the meaning of a CALL by investigating only the last term, "print" in the example.
+     */
+    public enum tokens {
+        ADD_OP, ASSIGN_OP,
+        CALL, CLASS,
+        DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
+        FUNCTION_DECLARATION,
+        IDENTIFIER, IF, INTEGER,
+        L_BRCE, L_PAREN,
+        MULT_OP,
+        PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
+        R_BRCE, R_PAREN,
+        SEMI_COLON, STATIC, STRING, SUB_OP,
+        VARIABLE, VOID,
+        WHILE
+    }
+
+
     //Global variables
     static int currentChar;
     static int charClass;
     static String lexeme;
     static FileReader reader;
-    static int token;
-
-    //Global scope for the file used in this class
-    static {
-        try {
-            reader = new FileReader("Test 1.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static BufferedReader buffReader = new BufferedReader(reader);
-
-
+    static BufferedReader buffReader;
+    static tokens token;
+    static String tokenText;
+    static ArrayList<tokenInfo> tokenList = new ArrayList<tokenInfo>();
 
     /*  lexer functions for assigning classes and tokens   */
     static void getNonBlank() throws IOException {
@@ -81,6 +94,9 @@ public class Interpreter {
 
     static void getChar() throws IOException {
         currentChar = buffReader.read();
+        while (isWhitespace(currentChar)) {
+            currentChar = buffReader.read();
+        }
 
         if (currentChar != EOF) {
             if (Character.isLetter(currentChar))
@@ -95,71 +111,134 @@ public class Interpreter {
         if (charClass == SPACE)
             return;
         System.out.println("Char pulled: " + (char) currentChar);
-        System.out.println("Class of that char: " + charClass);
+        System.out.println("Class of that char: " + charClass + "\n");
 
-        gui.EP.appendText("Char pulled: " + (char) currentChar + "\n");
-        gui.EP.appendText("Class of that char: " + charClass + "\n");
-
-
+//        gui.EP.appendText("Char pulled: " + (char) currentChar + "\n");
+//        gui.EP.appendText("Class of that char: " + charClass + "\n");
 
 
     }
 
     static void lookup() {
         switch (currentChar) {
-            case '=' -> token = ASSIGN_OP;
-            case ';' -> token = SEMI_COLON;
-            case '+' -> token = ADD_OP;
-            case '-' -> token = SUB_OP;
-            case '/' -> token = DIV_OP;
-            case '*' -> token = MULT_OP;
+            case '=' -> token = tokens.ASSIGN_OP;
+            case ';' -> token = tokens.SEMI_COLON;
+            case '+' -> token = tokens.ADD_OP;
+            case '-' -> token = tokens.SUB_OP;
+            case '/' -> token = tokens.DIV_OP;
+            case '*' -> token = tokens.MULT_OP;
         }
     }
 
-    static int lexer() throws IOException {
-        lexeme = "";
-        addChar();
+    static void lexer() throws IOException {
+        while (currentChar != -1){
+            lexeme = "";
+            addChar();
 
-        switch (charClass) {
-            case DIGIT:
-                //A condition must still be added that accounts for decimals.
-                token = INTEGER;
-                while (isWhitespace(currentChar) == false) {
-                    getChar();
-                    if (isWhitespace(currentChar))
-                        return token;
-                    addChar();
-                }
-                break;
-
-            case LETTER:
-                while (isWhitespace(currentChar) == false) {
-                    if (Objects.equals(lexeme, "if")) {
-                        return token = IF;
-                    } else if (Objects.equals(lexeme, "while")) {
-                        return token = WHILE;
-                    } else if (Objects.equals(lexeme, "int")) {
-                        return token = DECLARATION;
+            switch (charClass) {
+                case DIGIT:
+                    //A condition must still be added that accounts for decimals.
+                    token = tokens.INTEGER;
+                    while (isWhitespace(currentChar) == false) {
+                        getChar();
+                        if (isWhitespace(currentChar)) {
+                            addTokenObject(token, lexeme);
+                            break;
+                        }
+                        addChar();
                     }
-                    getChar();
-                    if (isWhitespace(currentChar)) {
-                        return token = IDENTIFIER;
+                    break;
+                case LETTER:
+                    while (isWhitespace(currentChar) == false) {
+                        if (Objects.equals(lexeme, "if")) {
+                            token = tokens.IF;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "while")) {
+                            token = tokens.WHILE;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "int")) {
+                            token = tokens.DECLARATION;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "main(")) {
+                            token = tokens.DRIVER;
+                            lexeme = "main()";
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "String")) {
+                            token = tokens.DATA_TYPE;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "args")) {
+                            token = tokens.PARAMETER;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "print")) {
+                            token = tokens.CALL;
+                            addTokenObject(token, lexeme);
+                            break;
+                        }
+                        getChar();
+                        if (isWhitespace(currentChar)) {
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (currentChar == '.') {
+                            lexeme = "";
+                            getChar();
+                        }
+                        addChar();
+                        System.out.println("Current lexeme: " + lexeme);
+//                        gui.EP.appendText("Current lexeme: " + lexeme + "\n");
                     }
-                    addChar();
-                    System.out.println("Current lexeme: " + lexeme);
-                    gui.EP.appendText("Current lexeme: " + lexeme + "\n");
-                }
-                break;
+                    break;
 
-            case OTHER:
-                lookup();
-                break;
+                case OTHER:
+                    if (currentChar == '\"') {
+                        token = tokens.STRING;
+                        getChar();
+                        addChar();
+                        while (currentChar != '\"') {
+                            getChar();
+                            addChar();
+                        }
+                        addTokenObject(token, lexeme);
+                    } else {
+                        lookup();
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + charClass);
+            }
+            getChar();
         }
-
-        return token;
     }
 
 
+
+
+    static void cleanFile() throws IOException {
+        Path filePath = Path.of("Test 1.txt");
+        Path cleanFile = Path.of("cleanFile.txt");
+
+        String fileContents = Files.readString(filePath, StandardCharsets.US_ASCII);
+        fileContents = fileContents.replace("public", "");
+        fileContents = fileContents.replace("static", "");
+        fileContents = fileContents.replace("void", "");
+        Files.writeString(cleanFile, fileContents);
+        reader = new FileReader("cleanFile.txt");
+        buffReader = new BufferedReader(reader);
+
+    }
+    static void addTokenObject(tokens token, String lexeme){
+        tokenInfo tokenInfoObject = new tokenInfo();
+        tokenInfoObject.token = token;
+        tokenInfoObject.lexeme = lexeme;
+        tokenList.add(tokenInfoObject);
+
+    }
     static void stmt_list() {
 //        while (token != EOF) {
 //            stmt();
@@ -181,28 +260,20 @@ public class Interpreter {
     }
 
     public static void runInterpreter() throws IOException{
-        while (currentChar != -1) {
-            getChar();
-            lexer();
-            stmt_list();
-            System.out.println("The current token is: " + token + "\n");
-            gui.EP.appendText("The current token is: " + token + "\n\n");
-        }
+        cleanFile();
+        getChar();
+        lexer();
+        System.out.println("The current token is: " + token + "\n");
+//        gui.EP.appendText("The current token is: " + token + "\n\n");
         reader.close();
         buffReader.close();
+
+        for (int i = 0; i < tokenList.size(); i++){
+            System.out.println("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme);
+        }
     }
     public static void main(String[] args) throws IOException {
-
-        while (currentChar != -1) {
-            getChar();
-            lexer();
-            stmt_list();
-            System.out.println("The current token is: " + token + "\n");
-            gui.EP.appendText("The current token is: " + token + "\n\n");
-
-        }
-        reader.close();
-        buffReader.close();
+        runInterpreter();
     }
 }
 
