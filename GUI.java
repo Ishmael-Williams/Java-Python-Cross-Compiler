@@ -46,12 +46,12 @@ public class GUI extends Application {
 
         /***********TextArea Declarations***************/
 
-        EJ.setPrefColumnCount(30);
+        EJ.setPrefColumnCount(40);
         EJ.setPrefRowCount(25);
         EJ.setPromptText("Enter Java code here." +
                 " You may also load existing Java files.");
 
-        EP.setPrefColumnCount(30);
+        EP.setPrefColumnCount(40);
         EP.setPrefRowCount(25);
         EP.setPromptText("Python code is printed here as output.");
 
@@ -71,7 +71,7 @@ public class GUI extends Application {
         //root.add(SP, 3,1);
         root.add(settings, 0, 4);
 
-        Scene scene = new Scene(root, 800, 650);
+        Scene scene = new Scene(root, 1000, 750);
 
         //Statement to change current theme of application
         scene.getStylesheets().add("dark_mode.css");

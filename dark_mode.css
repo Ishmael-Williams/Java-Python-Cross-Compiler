@@ -2,13 +2,16 @@
 	-fx-background-color: gray;
 	-fx-text-fill: white;
 	-fx-background-radius: 15px;
+	-fx-font-size: 13pt;
 }
 
 .text-area{
 	-fx-text-fill: white;
+	-fx-font-size: 13pt;
 }
 .text-area .content{
 	-fx-background-color: black;
+	-fx-background-color: #1a1a1a;
 }
 
 Text {
@@ -18,10 +21,14 @@ Text {
 }
 
 .menu-bar{
-	-fx-background-color: black;
+    -fx-background-color: black;
+
 }
 
 .root{
 	-fx-background-color: #121212;
+	-fx-background-color: #2e2e2e;
+
+
 }
 

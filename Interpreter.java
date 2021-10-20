@@ -72,6 +72,7 @@ public class Interpreter {
 
 
     //Global variables
+    static boolean usesSpace = false;
     static int currentChar;
     static int charClass;
     static String lexeme;
@@ -94,7 +95,7 @@ public class Interpreter {
 
     static void getChar() throws IOException {
         currentChar = buffReader.read();
-        while (isWhitespace(currentChar)) {
+        while (isWhitespace(currentChar) && usesSpace == false) {
             currentChar = buffReader.read();
         }
 
@@ -112,11 +113,6 @@ public class Interpreter {
             return;
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass + "\n");
-
-//        gui.EP.appendText("Char pulled: " + (char) currentChar + "\n");
-//        gui.EP.appendText("Class of that char: " + charClass + "\n");
-
-
     }
 
     static void lookup() {
@@ -191,19 +187,20 @@ public class Interpreter {
                         }
                         addChar();
                         System.out.println("Current lexeme: " + lexeme);
-//                        gui.EP.appendText("Current lexeme: " + lexeme + "\n");
                     }
                     break;
 
                 case OTHER:
                     if (currentChar == '\"') {
                         token = tokens.STRING;
+                        usesSpace = true;
                         getChar();
                         addChar();
                         while (currentChar != '\"') {
                             getChar();
                             addChar();
                         }
+                        usesSpace = false;
                         addTokenObject(token, lexeme);
                     } else {
                         lookup();
@@ -265,12 +262,12 @@ public class Interpreter {
         getChar();
         lexer();
         System.out.println("The current token is: " + token + "\n");
-//        gui.EP.appendText("The current token is: " + token + "\n\n");
         reader.close();
         buffReader.close();
 
         for (int i = 0; i < tokenList.size(); i++){
             System.out.println("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme);
+            gui.EP.appendText("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme + "\n\n");
         }
     }
     public static void main(String[] args) throws IOException {
