@@ -17,6 +17,7 @@ import java.util.Scanner;
 public class GUI extends Application {
     public GUI() throws FileNotFoundException {
         Interpreter interpreter = new Interpreter(GUI.this);
+        Converter converter  = new Converter(GUI.this);
     }
     public static void main (String[] args) throws IOException {
 //        args = new String[2];

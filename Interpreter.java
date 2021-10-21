@@ -37,12 +37,13 @@ public class Interpreter {
     static class tokenInfo {
         tokens token;
         String lexeme;
+        boolean special = false;
     }
 
     //Character classes
     static final int LETTER = 0;
     static final int DIGIT = 1;
-    static final int SPACE = 98;
+    static final int SPACE = 99;
     static final int OTHER = 99;
     static final int EOF = -1;
 
@@ -57,15 +58,16 @@ public class Interpreter {
      */
     public enum tokens {
         ADD_OP, ASSIGN_OP,
-        CALL, CLASS,
+        CALL, CLASS, CR,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
         FUNCTION_DECLARATION,
         IDENTIFIER, IF, INTEGER,
-        L_BRCE, L_PAREN,
+        L_BRCE, L_BRCT, L_PAREN,
         MULT_OP,
+        NEW_LINE,
         PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
-        R_BRCE, R_PAREN,
-        SEMI_COLON, STATIC, STRING, SUB_OP,
+        R_BRCE, R_BRCT, R_PAREN,
+        SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
         VARIABLE, VOID,
         WHILE
     }
@@ -76,9 +78,9 @@ public class Interpreter {
     static int currentChar;
     static int charClass;
     static String lexeme;
+    static tokens token;
     static FileReader reader;
     static BufferedReader buffReader;
-    static tokens token;
     static String tokenText;
     static ArrayList<tokenInfo> tokenList = new ArrayList<tokenInfo>();
 
@@ -95,9 +97,9 @@ public class Interpreter {
 
     static void getChar() throws IOException {
         currentChar = buffReader.read();
-        while (isWhitespace(currentChar) && usesSpace == false) {
-            currentChar = buffReader.read();
-        }
+//        while (isWhitespace(currentChar) && usesSpace == false) {
+//            currentChar = buffReader.read();
+//        }
 
         if (currentChar != EOF) {
             if (Character.isLetter(currentChar))
@@ -109,8 +111,6 @@ public class Interpreter {
             else charClass = OTHER;
         } else charClass = EOF;
 
-        if (charClass == SPACE)
-            return;
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass + "\n");
     }
@@ -123,7 +123,17 @@ public class Interpreter {
             case '-' -> token = tokens.SUB_OP;
             case '/' -> token = tokens.DIV_OP;
             case '*' -> token = tokens.MULT_OP;
+            case '(' -> token = tokens.L_PAREN;
+            case ')' -> token = tokens.R_PAREN;
+            case '{' -> token = tokens.L_BRCE;
+            case '}' -> token = tokens.R_BRCE;
+            case '[' -> token = tokens.L_BRCT;
+            case ']' -> token = tokens.R_BRCT;
+            case ' ' -> token = tokens.SPACE;
+            case '\r' -> token = tokens.CR;
+            case '\n' -> token = tokens.NEW_LINE;
         }
+
     }
 
     static void lexer() throws IOException {
@@ -158,10 +168,11 @@ public class Interpreter {
                             token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
                             break;
-                        } else if (Objects.equals(lexeme, "main(")) {
+                        } else if (Objects.equals(lexeme, "main")) {
                             token = tokens.DRIVER;
-                            lexeme = "main()";
+                            lexeme = "main";
                             addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
                             break;
                         } else if (Objects.equals(lexeme, "String")) {
                             token = tokens.DATA_TYPE;
@@ -204,6 +215,7 @@ public class Interpreter {
                         addTokenObject(token, lexeme);
                     } else {
                         lookup();
+                        addTokenObject(token, lexeme);
                     }
                     break;
                 default:
@@ -221,9 +233,11 @@ public class Interpreter {
         Path cleanFile = Path.of("cleanFile.txt");
 
         String fileContents = Files.readString(filePath, StandardCharsets.US_ASCII);
-        fileContents = fileContents.replace("public", "");
-        fileContents = fileContents.replace("static", "");
-        fileContents = fileContents.replace("void", "");
+        fileContents = fileContents.replace("public ", "");
+        fileContents = fileContents.replace("static ", "");
+        fileContents = fileContents.replace("void ", "");
+        fileContents = fileContents.replace("{", "");
+        fileContents = fileContents.replace("}", "");
         Files.writeString(cleanFile, fileContents);
         reader = new FileReader("cleanFile.txt");
         buffReader = new BufferedReader(reader);
@@ -267,8 +281,9 @@ public class Interpreter {
 
         for (int i = 0; i < tokenList.size(); i++){
             System.out.println("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme);
-            gui.EP.appendText("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme + "\n\n");
+            //gui.EP.appendText("Token " + (i+1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme + "\n\n");
         }
+        Converter.runConverter(tokenList);
     }
     public static void main(String[] args) throws IOException {
         runInterpreter();
