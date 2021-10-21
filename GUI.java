@@ -38,7 +38,7 @@ public class GUI extends Application {
         primaryStage.setTitle("Java Cross-Compiler to Python");
 
         /***********Button Declarations*****************/
-        Button LJ = new Button("Load Script");
+        Button LJ = new Button("Load file");
         Button SJ = new Button("Save");
         Button compile = new Button("Compile");
         //Button SP = new Button("Save");
