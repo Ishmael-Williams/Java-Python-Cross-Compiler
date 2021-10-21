@@ -47,6 +47,7 @@ public class GUI extends Application {
 
         /***********TextArea Declarations***************/
 
+
         EJ.setPrefColumnCount(40);
         EJ.setPrefRowCount(25);
         EJ.setPromptText("Enter Java code here." +
