@@ -103,9 +103,10 @@ public class SaveWindow extends Application{
             pw.close();
 
         }catch(FileNotFoundException FNE){
-            ErrorWindow ew = new ErrorWindow();
-            ew.display("FILE NOT FOUND",
-                    "The file could not be found.");
+//            ErrorWindow ew = new ErrorWindow();
+//            ew.display("FILE NOT FOUND",
+//                    "The file could not be found.");
+            FNE.printStackTrace();
         }
     }
 

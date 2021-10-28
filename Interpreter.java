@@ -229,7 +229,7 @@ public class Interpreter {
 
 
     static void cleanFile() throws IOException {
-        Path filePath = Path.of("Test 1.txt");
+        Path filePath = Path.of("Test 2.txt");
         Path cleanFile = Path.of("cleanFile.txt");
 
         String fileContents = Files.readString(filePath, StandardCharsets.US_ASCII);
