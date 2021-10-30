@@ -2,7 +2,10 @@ import javafx.application.*;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,6 +21,7 @@ public class GUI extends Application {
     public GUI() throws FileNotFoundException {
         Interpreter interpreter = new Interpreter(GUI.this);
         Converter converter  = new Converter(GUI.this);
+
     }
     public static void main (String[] args) throws IOException {
 //        args = new String[2];
@@ -29,7 +33,7 @@ public class GUI extends Application {
     //Moved the text areas out of "start()" to make them visible outside this class
     TextArea EJ = new TextArea();
     TextArea EP = new TextArea();
-
+    static File inputFile = new File("");
     //A flag for keeping track of unsaved changes in the editor.
     boolean isEdited = false;
 
@@ -86,9 +90,16 @@ public class GUI extends Application {
         LJ.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 try {
-                    File file = new File("Test 1.txt");
-                    Scanner scan = new Scanner(file);
+                    FileChooser fc = new FileChooser();
+                    fc.setTitle("Load Java file");
+                    fc.setInitialDirectory(new File("..\\Java-Python-Cross-Compiler\\Test Programs"));
+                    inputFile = fc.showOpenDialog(primaryStage);
+                    Interpreter.file = inputFile;
+
+                    Scanner scan = new Scanner(inputFile);
+
                     String currentLine;
+
                     while(scan.hasNextLine()) {
                         currentLine = scan.nextLine();
                         System.out.println(currentLine);
@@ -103,7 +114,15 @@ public class GUI extends Application {
         compile.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
                 try {
-                    Interpreter.runInterpreter();
+                    if(inputFile.toString() == "" && EJ.getText() == ""){
+                        Alert noInputError = new Alert(Alert.AlertType.ERROR);
+                        noInputError.setTitle("No Input");
+                        noInputError.setContentText("No input has been provided \nEither enter java code manually or load a java file");
+                        noInputError.showAndWait();
+
+                    } else {
+                        Interpreter.runInterpreter();
+                    }
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
