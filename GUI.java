@@ -93,7 +93,7 @@ public class GUI extends Application {
 
                     FileChooser fc = new FileChooser();
                     fc.setTitle("Load Java file");
-                    fc.setInitialDirectory(new File("..\\Java-Python-Cross-Compiler\\Test Programs"));
+                    fc.setInitialDirectory(new File("Test Programs"));
                     inputFile = fc.showOpenDialog(primaryStage);
                     Interpreter.file = inputFile;
 
