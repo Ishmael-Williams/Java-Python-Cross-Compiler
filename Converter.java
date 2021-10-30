@@ -152,7 +152,7 @@ public class Converter {
         pythonText += "print(f\"";
         index += 2;
         while(tokenList.get(index).token != Interpreter.tokens.R_PAREN) {
-            if (tokenList.get(index).token == Interpreter.tokens.VARIABLE){
+            if (tokenList.get(index).token == Interpreter.tokens.IDENTIFIER){
                 tokenList.get(index).lexeme = "{" + tokenList.get(index).lexeme + "}";
                 pythonText += tokenList.get(index).lexeme;
             } else if(tokenList.get(index).token == Interpreter.tokens.STRING){

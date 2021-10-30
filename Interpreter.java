@@ -58,7 +58,7 @@ public class Interpreter {
      */
     public enum tokens {
         ADD_OP, ASSIGN_OP,
-        CALL, CLASS, CR,
+        PRINT, CLASS, CR,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
         FUNCTION_DECLARATION,
         IDENTIFIER, IF, INTEGER,
@@ -183,7 +183,7 @@ public class Interpreter {
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "print")) {
-                            token = tokens.CALL;
+                            token = tokens.PRINT;
                             addTokenObject(token, lexeme);
                             break;
                         }
@@ -195,6 +195,13 @@ public class Interpreter {
                         } else if (currentChar == '.') {
                             lexeme = "";
                             getChar();
+                        } else if (currentChar == ')'){
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            lookup();
+                            lexeme = Character.toString(currentChar);
+                            addTokenObject(token, lexeme);
+                            break;
                         }
                         addChar();
                         System.out.println("Current lexeme: " + lexeme);
@@ -238,6 +245,7 @@ public class Interpreter {
         fileContents = fileContents.replace("void ", "");
         fileContents = fileContents.replace("{", "");
         fileContents = fileContents.replace("}", "");
+        fileContents = fileContents.replace(";", "");
         Files.writeString(cleanFile, fileContents);
         reader = new FileReader("cleanFile.txt");
         buffReader = new BufferedReader(reader);
