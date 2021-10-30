@@ -1,5 +1,3 @@
-import com.sun.javafx.css.parser.Token;
-
 import java.util.ArrayList;
 
 public class Converter {
@@ -7,9 +5,11 @@ public class Converter {
     public Converter(GUI gui) {
         this.gui = gui;
     }
+    static String pythonText = "";
+    static ArrayList<Interpreter.tokenInfo> tokenList;
 
-    static public void runConverter(ArrayList<Interpreter.tokenInfo> tokenList){
-        String pythonText = "";
+    static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList){
+        tokenList = oldTokenList;
         //for each token in tokenList, determine the Python equivalent
         for (int i = 0; i < tokenList.size(); i++){
             if (tokenList.get(i).special) {
@@ -38,20 +38,21 @@ public class Converter {
                             pythonText += replacedString;
                         }
                         break;
-                    case CALL: //Handling variable wrapping in strings.
-                        tokenList.get(i).lexeme = "\t" + tokenList.get(i).lexeme;
-                        try {
-                            if (tokenList.get(i + 1).token.equals(Interpreter.tokens.L_PAREN)
-                                    && tokenList.get(i + 2).token.equals(Interpreter.tokens.STRING)) {
-                                int startIndex = i +2; //index of beginning of string in the tokenList
-                                tokenList = new ArrayList<Interpreter.tokenInfo> (variableWrap(tokenList, startIndex));
-                                pythonText += tokenList.get(i).lexeme;
-                            }
-                        }catch(ArrayIndexOutOfBoundsException OOB){
-                            //End of array was reached.
-                            System.out.println(OOB.getMessage());
-                            break;
-                        }
+                    case PRINT: //Handling variable wrapping in strings.
+                        i = printHandler(i);
+//                        tokenList.get(i).lexeme = "\t" + tokenList.get(i).lexeme;
+//                        try {
+//                            if (tokenList.get(i + 1).token.equals(Interpreter.tokens.L_PAREN)
+//                                    && tokenList.get(i + 2).token.equals(Interpreter.tokens.STRING)) {
+//                                int startIndex = i +2; //index of beginning of string in the tokenList
+//                                tokenList = new ArrayList<Interpreter.tokenInfo> (variableWrap(tokenList, startIndex));
+//                                pythonText += tokenList.get(i).lexeme;
+//                            }
+//                        }catch(ArrayIndexOutOfBoundsException OOB){
+//                            //End of array was reached.
+//                            System.out.println(OOB.getMessage());
+//                            break;
+//                        }
 
                         break;
                     case STRING:
@@ -138,13 +139,32 @@ public class Converter {
     public static String cleanString(String s){
         System.out.println("String before cleaning " + s);
         StringBuilder sb = new StringBuilder(s);
-        for (int i = 2; i < s.length() -1; i++){
+        for (int i = 0; i < s.length(); i++){
             if(s.charAt(i) == '\"') {
-                sb.setCharAt(i, ' ');
+                sb.setCharAt(i, '\0');
             }
         }
         System.out.println(sb.toString());
         return sb.toString();
+    }
+
+    public static int printHandler(int index){
+        pythonText += "print(f\"";
+        index += 2;
+        while(tokenList.get(index).token != Interpreter.tokens.R_PAREN) {
+            if (tokenList.get(index).token == Interpreter.tokens.VARIABLE){
+                tokenList.get(index).lexeme = "{" + tokenList.get(index).lexeme + "}";
+                pythonText += tokenList.get(index).lexeme;
+            } else if(tokenList.get(index).token == Interpreter.tokens.STRING){
+                tokenList.get(index).lexeme = cleanString(tokenList.get(index).lexeme);
+                pythonText += tokenList.get(index).lexeme;
+            } else{
+                System.out.println("This token :" + tokenList.get(index).token.toString() + ", is not yet supported in print calls");
+            }
+            index++;
+        }
+        pythonText +=  "\"" +tokenList.get(index).lexeme;
+        return index;
     }
 }
 
