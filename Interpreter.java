@@ -248,7 +248,7 @@ public class Interpreter {
         contents = contents.replace("void ", "");
         contents = contents.replace("{", "");
         contents = contents.replace("}", "");
-        fileContents = fileContents.replace(";", "");
+        contents = contents.replace(";", "");
 
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
         Files.writeString(cleanFile, contents);
