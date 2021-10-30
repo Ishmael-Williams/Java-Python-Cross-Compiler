@@ -29,6 +29,7 @@ import static java.lang.Character.isWhitespace;
 
 public class Interpreter {
     private static GUI gui;
+    static File file = new File("");
 
     public Interpreter(GUI gui) {
         this.gui = gui;
@@ -234,23 +235,28 @@ public class Interpreter {
 
 
 
-
-    static void cleanFile() throws IOException {
-        Path filePath = Path.of("Test 2.txt");
-        Path cleanFile = Path.of("cleanFile.txt");
-
-        String fileContents = Files.readString(filePath, StandardCharsets.US_ASCII);
-        fileContents = fileContents.replace("public ", "");
-        fileContents = fileContents.replace("static ", "");
-        fileContents = fileContents.replace("void ", "");
-        fileContents = fileContents.replace("{", "");
-        fileContents = fileContents.replace("}", "");
+    static void cleanInput() throws IOException {
+        String contents = "";
+        if (file.toString() == ""){
+            contents = gui.EJ.getText();
+        } else {
+            Path filePath = Path.of(file.getPath());
+            contents = Files.readString(filePath, StandardCharsets.US_ASCII);
+        }
+        contents = contents.replace("public ", "");
+        contents = contents.replace("static ", "");
+        contents = contents.replace("void ", "");
+        contents = contents.replace("{", "");
+        contents = contents.replace("}", "");
         fileContents = fileContents.replace(";", "");
-        Files.writeString(cleanFile, fileContents);
-        reader = new FileReader("cleanFile.txt");
-        buffReader = new BufferedReader(reader);
 
+        Path cleanFile = Path.of("Test Programs/cleanFile.txt");
+        Files.writeString(cleanFile, contents);
+        reader = new FileReader("Test Programs/cleanFile.txt");
+
+        buffReader = new BufferedReader(reader);
     }
+
     static void addTokenObject(tokens token, String lexeme){
         tokenInfo tokenInfoObject = new tokenInfo();
         tokenInfoObject.token = token;
@@ -258,29 +264,9 @@ public class Interpreter {
         tokenList.add(tokenInfoObject);
 
     }
-    static void stmt_list() {
-//        while (token != EOF) {
-//            stmt();
-//        }
-    }
-
-    /*  Parser functions for determining syntax through parse trees */
-    static void stmt() {
-    }
-
-    static void expr() {
-    }
-
-    static void term() {
-    }
-
-    static void factor() {
-
-    }
-
 
     public static void runInterpreter() throws IOException{
-        cleanFile();
+        cleanInput();
         getChar();
         lexer();
         System.out.println("The current token is: " + token + "\n");
@@ -293,6 +279,7 @@ public class Interpreter {
         }
         Converter.runConverter(tokenList);
     }
+
     public static void main(String[] args) throws IOException {
         runInterpreter();
     }
