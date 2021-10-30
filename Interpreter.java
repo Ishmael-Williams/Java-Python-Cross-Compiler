@@ -59,7 +59,7 @@ public class Interpreter {
      */
     public enum tokens {
         ADD_OP, ASSIGN_OP,
-        CALL, CLASS, CR,
+        PRINT, CLASS, CR,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
         FUNCTION_DECLARATION,
         IDENTIFIER, IF, INTEGER,
@@ -184,7 +184,7 @@ public class Interpreter {
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "print")) {
-                            token = tokens.CALL;
+                            token = tokens.PRINT;
                             addTokenObject(token, lexeme);
                             break;
                         }
@@ -196,6 +196,13 @@ public class Interpreter {
                         } else if (currentChar == '.') {
                             lexeme = "";
                             getChar();
+                        } else if (currentChar == ')'){
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            lookup();
+                            lexeme = Character.toString(currentChar);
+                            addTokenObject(token, lexeme);
+                            break;
                         }
                         addChar();
                         System.out.println("Current lexeme: " + lexeme);
@@ -226,6 +233,8 @@ public class Interpreter {
         }
     }
 
+
+
     static void cleanInput() throws IOException {
         String contents = "";
         if (file.toString() == ""){
@@ -239,10 +248,12 @@ public class Interpreter {
         contents = contents.replace("void ", "");
         contents = contents.replace("{", "");
         contents = contents.replace("}", "");
+        fileContents = fileContents.replace(";", "");
 
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
         Files.writeString(cleanFile, contents);
         reader = new FileReader("Test Programs/cleanFile.txt");
+
         buffReader = new BufferedReader(reader);
     }
 

@@ -42,7 +42,7 @@ public class GUI extends Application {
         primaryStage.setTitle("Java Cross-Compiler to Python");
 
         /***********Button Declarations*****************/
-        Button LJ = new Button("Load file");
+        Button LJ = new Button("Load File");
         Button SJ = new Button("Save");
         Button compile = new Button("Compile");
         //Button SP = new Button("Save");
@@ -90,6 +90,7 @@ public class GUI extends Application {
         LJ.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 try {
+
                     FileChooser fc = new FileChooser();
                     fc.setTitle("Load Java file");
                     fc.setInitialDirectory(new File("..\\Java-Python-Cross-Compiler\\Test Programs"));
@@ -97,6 +98,7 @@ public class GUI extends Application {
                     Interpreter.file = inputFile;
 
                     Scanner scan = new Scanner(inputFile);
+
 
                     String currentLine;
 
