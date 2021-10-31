@@ -1,0 +1,13 @@
+import java.util.*;
+public static void main(String[] args){
+	Scanner scan = new Scanner(System.in);
+
+	System.out.print("Enter two integers to mutiply together.\nEnter integer 1 : ");
+	int x = scan.nextInt();
+
+	System.out.print("\nEnter integer 2 : ");
+	int y = scan.nextInt();
+
+	int result = x * y;
+	System.out.print("\nThe result of multiplying " + x + " * " + y + " equals " + result);
+}

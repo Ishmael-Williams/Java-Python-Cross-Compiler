@@ -1,0 +1,41 @@
+import java.util.*;
+public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
+
+        int[] samp = {1,2,3,4,5,6,7,8,9,10};
+        System.out.print("INDEX #: 0 1 2 3 4 5 6 7 8 9");
+        System.out.print("\n\t\t[");
+        for(int i = 0 ; i < samp.length ; i++){
+            if(i ==  9){
+                System.out.print(samp[i] + "]");
+            } else {
+                System.out.print(samp[i] + ",");
+            }
+        }
+
+        System.out.print("\nPlease select two values from the above array to " +
+                "perform an operation on based their index. \nSelect First Index: ");
+        int a = scan.nextInt();
+        int x = samp[a];
+        System.out.print("\nSelect Second Index: ");
+        int b = scan.nextInt();
+        int y = samp[b];
+
+
+        System.out.print("\nPlease select an operation to perform based on the number associated with each operation." +
+                "\n(0) Addition \n(1) Subtraction \n(2) Multiplication \n(3) Division \nOperation Choice: ");
+        int z = scan.nextInt();
+        if(z == 0){
+            int result = x + y;
+            System.out.print("\nThe result of " + x + " +  " + y + " equals " + result);
+        } else if (z == 1){
+            int result = x - y;
+            System.out.print("\nThe result of " + x + " -  " + y + " equals " + result);
+        } else if (z == 2){
+            int result = x * y;
+            System.out.print("\nThe result of " + x + " *  " + y + " equals " + result);
+        } else if (z == 3){
+            float result = (float) x / (float) y ;
+        System.out.print("\nThe result of " + x + " /  " + y + " equals " + result);
+    }
+}

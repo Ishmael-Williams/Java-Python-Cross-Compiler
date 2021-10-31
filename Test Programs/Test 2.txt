@@ -1,0 +1,7 @@
+public static void main(String[] args){
+	int x = 20;
+	int y = 21;
+
+	System.out.print("The value of variable x is : " + x + ", and the value of variable y is : " +
+	y + ".");
+}

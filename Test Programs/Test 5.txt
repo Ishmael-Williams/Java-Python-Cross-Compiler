@@ -1,0 +1,15 @@
+import java.util.*;
+public static void main(String[] args){
+	Scanner scan = new Scanner(System.in);
+
+	int[] inputs = new int[5];
+	System.out.print("Please enter five integer values to fill your array : ");
+	for(int i = 0 ;  i < inputs.length ; i++){
+		inputs[i] = scan.nextInt();
+	}
+
+	System.out.print("\nArray has been filled. Printing contents...");
+	for(int j = 0 ; j < inputs.length ; j++){
+		System.out.print("\nAt index " + j + ", the array contains a value of " + inputs[j]);
+	}
+}
