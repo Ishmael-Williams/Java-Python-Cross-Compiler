@@ -1,0 +1,11 @@
+def main():
+    x = input("Enter two integers to multiply together.\nEnter integer 1 :")
+    y = input("Enter integer 2: ")
+
+    result = int(x) * int(y)
+
+    print("The result of multiplying ", x, "and ", y, " equals ", result)
+
+
+if __name__ == "__main__":
+    main()

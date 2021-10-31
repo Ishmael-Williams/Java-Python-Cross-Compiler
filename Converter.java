@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class Converter {
@@ -8,8 +13,9 @@ public class Converter {
     static String pythonText = "";
     static ArrayList<Interpreter.tokenInfo> tokenList;
 
-    static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList){
+    static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList) throws IOException {
         tokenList = oldTokenList;
+        pythonText = "";
         //for each token in tokenList, determine the Python equivalent
         for (int i = 0; i < tokenList.size(); i++){
             if (tokenList.get(i).special) {
@@ -73,6 +79,7 @@ public class Converter {
         pythonText += "\nif __name__ == \"__main__\": \n\tmain()";
         System.out.println(pythonText);
         gui.EP.setText(pythonText);
+        isAccurate(pythonText);
     }
 
     /**
@@ -165,6 +172,38 @@ public class Converter {
         }
         pythonText +=  "\"" +tokenList.get(index).lexeme;
         return index;
+    }
+
+    public static boolean isAccurate(String pythonText) throws IOException {
+        boolean isAccurate = true;
+        String caseNumber = Interpreter.file.getName().substring(5,6);
+        Path pythonPath = Path.of("Test Programs/Python Results/python" + caseNumber + ".txt");
+
+        File pythonFile = new File(String.valueOf(pythonPath));
+        String pythonCorrect = Files.readString(pythonPath, StandardCharsets.US_ASCII);
+
+        int errors = 0;
+        int i = 0;
+        int j = 0;
+        while (i < pythonCorrect.length() && j < pythonText.length()){
+            while (pythonCorrect.charAt(i) == ' ' || pythonCorrect.charAt(i) == '\n' ||
+                    pythonCorrect.charAt(i) == '\r' || pythonCorrect.charAt(i) == '\t' || pythonCorrect.charAt(i) == '\0'){
+                i++;
+            }
+            while (pythonText.charAt(j) == ' ' || pythonText.charAt(j) == '\n' ||
+                    pythonText.charAt(j) == '\r'  || pythonText.charAt(j) == '\t' || pythonText.charAt(j) == '\0'){
+                j++;
+            }
+
+            if (pythonCorrect.charAt(i) != pythonText.charAt(j)){
+                errors++;
+                isAccurate = false;
+            }
+            i++;
+            j++;
+        }
+        gui.accuracy.setText(gui.accuracy.getText() + errors + " mismatches.");
+        return isAccurate;
     }
 }
 

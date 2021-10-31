@@ -1,0 +1,9 @@
+def main():
+    x = 20
+    y = 21
+
+    print(f"The value of variable x is: {x}, and the value of variable y is : {y}.")
+
+
+if __name__ == "__main__":
+    main()

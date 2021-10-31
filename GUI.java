@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -33,6 +35,7 @@ public class GUI extends Application {
     //Moved the text areas out of "start()" to make them visible outside this class
     TextArea EJ = new TextArea();
     TextArea EP = new TextArea();
+    Label accuracy = new Label("Accuracy results: ");
     static File inputFile = new File("");
     //A flag for keeping track of unsaved changes in the editor.
     boolean isEdited = false;
@@ -40,13 +43,17 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
         primaryStage.setTitle("Java Cross-Compiler to Python");
+        /***********Label Declarations*****************/
 
+        accuracy.setFont(new Font("Serif", 30));
+        accuracy.setTextFill(Color.WHITE);
         /***********Button Declarations*****************/
         Button LJ = new Button("Load File");
         Button SJ = new Button("Save");
         Button compile = new Button("Compile");
         //Button SP = new Button("Save");
         Button settings = new Button("Settings");
+
 
 
         /***********TextArea Declarations***************/
@@ -76,6 +83,7 @@ public class GUI extends Application {
         root.add(compile, 0,3);
         //root.add(SP, 3,1);
         root.add(settings, 0, 4);
+        root.add(accuracy, 0, 5);
 
         Scene scene = new Scene(root, 1000, 750);
 
@@ -90,7 +98,7 @@ public class GUI extends Application {
         LJ.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 try {
-
+                    EJ.setText("");
                     FileChooser fc = new FileChooser();
                     fc.setTitle("Load Java file");
                     fc.setInitialDirectory(new File("Test Programs"));
@@ -123,6 +131,7 @@ public class GUI extends Application {
                         noInputError.showAndWait();
 
                     } else {
+                        EP.setText("");
                         Interpreter.runInterpreter();
                     }
                 } catch (IOException ex) {

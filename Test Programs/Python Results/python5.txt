@@ -1,0 +1,14 @@
+def main():
+    inputs = []
+
+    print("Please enter five integer values to fill your array : ")
+    for i in range(5):
+        inputs.append(input())
+
+    print("Array has been filled. Printing contents...")
+    for j in range(len(inputs)):
+        print("\nAt index ", int(j), "the array contains the value of ", inputs[int(j)])
+
+
+if __name__ == "__main__":
+    main()

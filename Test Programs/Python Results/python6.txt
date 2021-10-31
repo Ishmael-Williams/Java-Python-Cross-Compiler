@@ -1,0 +1,39 @@
+def main():
+    samp = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    print("INDEX #: 0 1 2 3 4 5 6 7 8 9")
+
+    print("\n\t\t[", end=" ")
+    for i in range(len(samp)):
+        if i == 9:
+            print(samp[int(i)], "]")
+        else:
+            print(samp[int(i)], end=" ")
+    print("\nPlease select two values from the above array to perform an operation on based their index"
+          "\nSelect First Index: ")
+    a = input(" ")
+    x = samp[int(a)]
+    print("\nSelect Second Index: ")
+    b = input(" ")
+    y = samp[int(b)]
+
+    print("\nPlease select an operation to perform based on the number associated with each operation." +
+          "\n(0) Addition \n(1) Subtraction \n(2) Multiplication \n(3) Division \nOperation Choice: ")
+
+    z = input(" ")
+
+    if int(z) == 0:
+        result = int(x) + int(y)
+        print("\nThe result of ", x, " + ", y, " equals ", result)
+    elif int(z) == 1:
+        result = int(x) - int(y)
+        print("\nThe result of ", x, " - ", y, " equals ", result)
+    elif int(z) == 2:
+        result = int(x) * int(y)
+        print("\nThe result of ", x, " * ", y, " equals ", result)
+    elif int(z) == 3:
+        result = float(x) / float(y)
+        print("\nThe result of ", x, " / ", y, " equals ", result)
+
+
+if __name__ == "__main__":
+    main()
