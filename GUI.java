@@ -154,13 +154,13 @@ public class GUI extends Application {
                 if (result.get() == yes) {
                     SaveWindow sw = new SaveWindow();
                     sw.display(this);
-                    isEdited = false; //File is up to date.
+                    isEdited = false; //File is up-to-date.
                 }
             }
             else{
                 SaveWindow sw = new SaveWindow();
                 sw.display(this);
-                isEdited = false; //File is up to date.
+                isEdited = false; //File is up-to-date.
             }
         });
 

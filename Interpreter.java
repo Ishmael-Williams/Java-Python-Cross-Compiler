@@ -70,7 +70,8 @@ public class Interpreter {
         R_BRCE, R_BRCT, R_PAREN,
         SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
         VARIABLE, VOID,
-        WHILE
+        WHILE, FOR,
+        GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL
     }
 
 
@@ -124,6 +125,8 @@ public class Interpreter {
             case '-' -> token = tokens.SUB_OP;
             case '/' -> token = tokens.DIV_OP;
             case '*' -> token = tokens.MULT_OP;
+            case '<' -> token = tokens.LESS_THAN;
+            case '>' -> token = tokens.GREATER_THAN;
             case '(' -> token = tokens.L_PAREN;
             case ')' -> token = tokens.R_PAREN;
             case '{' -> token = tokens.L_BRCE;
@@ -163,6 +166,10 @@ public class Interpreter {
                             break;
                         } else if (Objects.equals(lexeme, "while")) {
                             token = tokens.WHILE;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "for")){
+                            token = tokens.FOR;
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "int")) {

@@ -61,6 +61,10 @@ public class Converter {
 //                        }
 
                         break;
+
+                    case FOR:
+                        i = forLoopHandler(i);
+                        break;
                     case STRING:
                         System.out.println("STRING!!! -> " + tokenList.get(i).lexeme);
                         tokenList.get(i).lexeme = cleanString(tokenList.get(i).lexeme);
@@ -171,6 +175,66 @@ public class Converter {
             index++;
         }
         pythonText +=  "\"" +tokenList.get(index).lexeme;
+        return index;
+    }
+
+    /**
+     * Handles and converts a for loop starting at the provided index.
+     * @param index current index of the tokenList.
+     * @return new index in the tokenList
+     */
+    public static int forLoopHandler(int index){
+        boolean assignmentIncluded = false;
+        boolean valueIncluded = false;
+        boolean comparatorIncluded = false;
+        boolean rangeIncluded = false;
+        boolean validForLoop = false;
+        int semicolonIndex = 0;
+        int val = 0;
+        String identifier = "";
+
+        pythonText += "for ";
+        String forLoopText = "for "; //for debugging purposes. Want to see the python loop statement
+        //index += 2;
+
+        while (tokenList.get(index).token != Interpreter.tokens.R_PAREN){
+            if(tokenList.get(index).token == Interpreter.tokens.IDENTIFIER){
+                identifier = tokenList.get(index).lexeme;
+                while(tokenList.get(index).token != Interpreter.tokens.SEMI_COLON || tokenList.get(index).token
+                        != Interpreter.tokens.R_PAREN){
+                    if (tokenList.get(index).token == Interpreter.tokens.ASSIGN_OP)
+                        /*If we are in the declaration part of the loop statement, the range should be in the
+                        next part, disregard range until next semicolon delimiter.*/
+                            assignmentIncluded = true;
+                            rangeIncluded = false;
+                    if (tokenList.get(index).token == Interpreter.tokens.INTEGER) {
+                        valueIncluded = true;
+                        val = Integer.parseInt(tokenList.get(index).lexeme);
+                    }
+                    if(tokenList.get(index+1).token == Interpreter.tokens.SEMI_COLON){
+                        semicolonIndex = index+1;
+                    }
+                    if(tokenList.get(index).token == Interpreter.tokens.LESS_THAN){
+                        /*If we are in the comparator part of the loop statement, the range should be in the
+                        this part, disregard assignment check.*/
+                        comparatorIncluded = true;
+                        assignmentIncluded = false;
+                        rangeIncluded = true;
+
+                    }
+                    index++;
+                }
+                if(valueIncluded && comparatorIncluded && rangeIncluded)
+                    validForLoop = true;
+            }
+            index++;
+        }
+
+        if (validForLoop) {
+            pythonText += identifier + "in range(" + val + "):\n\t";
+            forLoopText += identifier + "in range(" + val + "):\n\t";
+            System.out.println("FOR LOOP STATEMENT: " + forLoopText);
+        }
         return index;
     }
 
