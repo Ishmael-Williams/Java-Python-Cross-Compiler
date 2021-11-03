@@ -37,12 +37,17 @@ public class Converter {
                         //Presently only accounts for a range of 0 to n. If the code specifies a starting range other than 0, that is not accounted for.
                         int counter = 0;
                         pythonText += tokenList.get(i).lexeme + " ";
-                        i += 2;
+                        i += 4;
                         pythonText += tokenList.get(i).lexeme + " ";
                         while (counter < 2){
                             if (tokenList.get(i).token == Interpreter.tokens.INTEGER){
                                 counter++;
+                                if (counter == 2){
+                                    break;
+                                }
                             }
+
+
                             i++;
                         }
                         pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
