@@ -35,10 +35,15 @@ public class Converter {
                         break;
                     case FOR:
                         //Presently only accounts for a range of 0 to n. If the code specifies a starting range other than 0, that is not accounted for.
-                        int counter = 0;
+
+
+                        //Skip lexemes between "for" and the declaration of "i"
                         pythonText += tokenList.get(i).lexeme + " ";
                         i += 4;
                         pythonText += tokenList.get(i).lexeme + " ";
+
+                        //Skip lexemes until the end range is found
+                        int counter = 0;
                         while (counter < 2){
                             if (tokenList.get(i).token == Interpreter.tokens.INTEGER){
                                 counter++;
@@ -46,15 +51,18 @@ public class Converter {
                                     break;
                                 }
                             }
-
-
                             i++;
                         }
+
                         pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
+                        i++; //This is to skip the lexeme ")"
+
+                        //Skip lexemes until
                         counter = 0;
                         while (counter < 1){
                             if (tokenList.get(i).token == Interpreter.tokens.IDENTIFIER){
                                 counter++;
+                                i += 5; //skip ")" and several formatting lexemes such as '\n' and '\t'
                             }
                             i++;
                         }
