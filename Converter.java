@@ -33,6 +33,28 @@ public class Converter {
                     case PRIMITIVE_DATA_TYPE:
                         pythonText += tokenList.get(i).lexeme + "\t";
                         break;
+                    case FOR:
+                        //Presently only accounts for a range of 0 to n. If the code specifies a starting range other than 0, that is not accounted for.
+                        int counter = 0;
+                        pythonText += tokenList.get(i).lexeme + " ";
+                        i += 2;
+                        pythonText += tokenList.get(i).lexeme + " ";
+                        while (counter < 2){
+                            if (tokenList.get(i).token == Interpreter.tokens.INTEGER){
+                                counter++;
+                            }
+                            i++;
+                        }
+                        pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
+                        counter = 0;
+                        while (counter < 1){
+                            if (tokenList.get(i).token == Interpreter.tokens.IDENTIFIER){
+                                counter++;
+                            }
+                            i++;
+                        }
+                        break;
+
                 }
             }
             if (!tokenList.get(i).special) {
@@ -79,7 +101,7 @@ public class Converter {
         pythonText += "\nif __name__ == \"__main__\": \n\tmain()";
         System.out.println(pythonText);
         gui.EP.setText(pythonText);
-        isAccurate(pythonText);
+        checkAccuracy(pythonText);
     }
 
     /**
@@ -174,7 +196,7 @@ public class Converter {
         return index;
     }
 
-    public static boolean isAccurate(String pythonText) throws IOException {
+    public static boolean checkAccuracy(String pythonText) throws IOException {
         boolean isAccurate = true;
         String caseNumber = Interpreter.file.getName().substring(5,6);
         Path pythonPath = Path.of("Test Programs/Python Results/python" + caseNumber + ".txt");
@@ -202,6 +224,7 @@ public class Converter {
             i++;
             j++;
         }
+        gui.accuracy.setText("Accuracy results: ");
         gui.accuracy.setText(gui.accuracy.getText() + errors + " mismatches.");
         return isAccurate;
     }

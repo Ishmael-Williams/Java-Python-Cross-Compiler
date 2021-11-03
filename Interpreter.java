@@ -61,7 +61,7 @@ public class Interpreter {
         ADD_OP, ASSIGN_OP,
         PRINT, CLASS, CR,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
-        FUNCTION_DECLARATION,
+        FOR, FUNCTION_DECLARATION,
         IDENTIFIER, IF, INTEGER,
         L_BRCE, L_BRCT, L_PAREN,
         MULT_OP,
@@ -69,6 +69,7 @@ public class Interpreter {
         PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
         R_BRCE, R_BRCT, R_PAREN,
         SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
+        UNKNOWN,
         VARIABLE, VOID,
         WHILE
     }
@@ -199,6 +200,23 @@ public class Interpreter {
                         } else if (currentChar == ')'){
                             token = tokens.IDENTIFIER;
                             addTokenObject(token, lexeme);
+                            lookup();
+                            lexeme = Character.toString(currentChar);
+                            addTokenObject(token, lexeme);
+                            break;
+                        }
+                        //Check for various function calls
+                        if (currentChar == '('){
+                            if (Objects.equals(lexeme, "for")){
+                                token = tokens.FOR;
+                                addTokenObject(token, lexeme);
+                                tokenList.get(tokenList.size()-1).special = true;
+                            } else {
+                                token = tokens.UNKNOWN;
+                                addTokenObject(token, lexeme);
+                            }
+
+                            //After processing the name and token for the function call up to this point, process the "(" the system is in possession of.
                             lookup();
                             lexeme = Character.toString(currentChar);
                             addTokenObject(token, lexeme);
