@@ -1,11 +1,11 @@
 def main():
     x = 5
 
-    print("The starting value of the variable x is ", x)
+    print(f"The starting value of the variable x is {x}")
 
     for i in range(3):
         x = x + 5
-        print("\nIncrementation detected. New value of x is ", x)
+        print(f"\nIncrementation detected. New value of x is {x}")
 
 
 if __name__ == "__main__":
