@@ -62,13 +62,13 @@ public class Interpreter {
         PRINT, CLASS, CR,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
         FOR, FUNCTION_DECLARATION,
-        IDENTIFIER, IF, INTEGER,
+        IDENTIFIER, IF, IMPORT, INTEGER,
         L_BRCE, L_BRCT, L_PAREN,
         MULT_OP,
-        NEW_LINE,
+        NEXT_INT, NEW_LINE,
         PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
         R_BRCE, R_BRCT, R_PAREN,
-        SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
+        SCANNER, SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
         UNKNOWN,
         VARIABLE, VOID,
         WHILE
@@ -149,7 +149,7 @@ public class Interpreter {
                     token = tokens.INTEGER;
                     while (isWhitespace(currentChar) == false) {
                         getChar();
-                        if (isWhitespace(currentChar)) {
+                        if (isWhitespace(currentChar) || currentChar == ';') {
                             addTokenObject(token, lexeme);
                             break;
                         }
@@ -188,9 +188,19 @@ public class Interpreter {
                             token = tokens.PRINT;
                             addTokenObject(token, lexeme);
                             break;
+                        }  else if (Objects.equals(lexeme, "import")) {
+                            token = tokens.IMPORT;
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
+                            break;
+                        }  else if (Objects.equals(lexeme, "Scanner")) {
+                            token = tokens.SCANNER;
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
+                            break;
                         }
                         getChar();
-                        if (isWhitespace(currentChar)) {
+                        if (isWhitespace(currentChar) || currentChar == ';') {
                             token = tokens.IDENTIFIER;
                             addTokenObject(token, lexeme);
                             break;
@@ -205,10 +215,14 @@ public class Interpreter {
                             addTokenObject(token, lexeme);
                             break;
                         }
-                        //Check for various function calls
+                        //Check for various function calls or flow control statements
                         if (currentChar == '('){
                             if (Objects.equals(lexeme, "for")){
                                 token = tokens.FOR;
+                                addTokenObject(token, lexeme);
+                                tokenList.get(tokenList.size()-1).special = true;
+                            } else if (Objects.equals(lexeme, "nextInt")){
+                                token = tokens.NEXT_INT;
                                 addTokenObject(token, lexeme);
                                 tokenList.get(tokenList.size()-1).special = true;
                             } else {
@@ -242,6 +256,11 @@ public class Interpreter {
                     } else {
                         lookup();
                         addTokenObject(token, lexeme);
+                        if (token == tokens.SEMI_COLON){
+                            tokenList.get(tokenList.size()-1).special = true;
+                        } else if (token == tokens.NEW_LINE){
+                            tokenList.get(tokenList.size()-1).special = true;
+                        }
                     }
                     break;
                 default:
@@ -266,7 +285,7 @@ public class Interpreter {
         contents = contents.replace("void ", "");
         contents = contents.replace("{", "");
         contents = contents.replace("}", "");
-        contents = contents.replace(";", "");
+//        contents = contents.replace(";", "");
 
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
         Files.writeString(cleanFile, contents);

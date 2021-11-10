@@ -2,7 +2,7 @@ import java.util.*;
 public static void main(String[] args){
 	Scanner scan = new Scanner(System.in);
 
-	System.out.print("Enter two integers to mutiply together.\nEnter integer 1 : ");
+	System.out.print("Enter two integers to multiply together.\nEnter integer 1 : ");
 	int x = scan.nextInt();
 
 	System.out.print("\nEnter integer 2 : ");
