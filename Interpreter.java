@@ -59,12 +59,13 @@ public class Interpreter {
      */
     public enum tokens {
         ADD_OP, ASSIGN_OP,
-        PRINT, CLASS, CR,
+        PRINT, CLASS, CR, COMMA,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
         FOR, FUNCTION_DECLARATION,
+        HASH,
         IDENTIFIER, IF, IMPORT, INTEGER,
         L_BRCE, L_BRCT, L_PAREN,
-        MULT_OP, HASH,
+        MULT_OP,
         NEXT_INT, NEW_LINE, NEW_TAB,
         PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
         R_BRCE, R_BRCT, R_PAREN,
@@ -121,6 +122,7 @@ public class Interpreter {
         switch (currentChar) {
             case '=' -> token = tokens.ASSIGN_OP;
             case ';' -> token = tokens.SEMI_COLON;
+            case ',' -> token = tokens.COMMA;
             case '+' -> token = tokens.ADD_OP;
             case '-' -> token = tokens.SUB_OP;
             case '/' -> token = tokens.DIV_OP;
@@ -209,6 +211,10 @@ public class Interpreter {
                         } else if (currentChar == '.') {
                             lexeme = "";
                             getChar();
+                        } else if (currentChar == ','){
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            break;
                         } else if (currentChar == ')'){
                             token = tokens.IDENTIFIER;
                             addTokenObject(token, lexeme);
@@ -261,6 +267,8 @@ public class Interpreter {
                         if (token == tokens.SEMI_COLON){
                             tokenList.get(tokenList.size()-1).special = true;
                         } else if (token == tokens.NEW_LINE){
+                            tokenList.get(tokenList.size()-1).special = true;
+                        } else if (token == tokens.NEW_TAB) {
                             tokenList.get(tokenList.size()-1).special = true;
                         }
                     }
