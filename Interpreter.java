@@ -64,8 +64,8 @@ public class Interpreter {
         FOR, FUNCTION_DECLARATION,
         IDENTIFIER, IF, IMPORT, INTEGER,
         L_BRCE, L_BRCT, L_PAREN,
-        MULT_OP,
-        NEXT_INT, NEW_LINE,
+        MULT_OP, HASH,
+        NEXT_INT, NEW_LINE, NEW_TAB,
         PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
         R_BRCE, R_BRCT, R_PAREN,
         SCANNER, SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
@@ -132,8 +132,10 @@ public class Interpreter {
             case '[' -> token = tokens.L_BRCT;
             case ']' -> token = tokens.R_BRCT;
             case ' ' -> token = tokens.SPACE;
+            case '#' -> token = tokens.HASH;
             case '\r' -> token = tokens.CR;
             case '\n' -> token = tokens.NEW_LINE;
+            case '\t' -> token = tokens.NEW_TAB;
         }
 
     }
