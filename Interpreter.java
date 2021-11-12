@@ -71,7 +71,7 @@ public class Interpreter {
         R_BRCE, R_BRCT, R_PAREN,
         SCANNER, SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
         UNKNOWN,
-        VARIABLE, VOID,
+        VARIABLE, VOID, ARRAY,
         WHILE
     }
 
@@ -174,7 +174,23 @@ public class Interpreter {
                             token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
                             break;
-                        } else if (Objects.equals(lexeme, "main")) {
+                        }else if (Objects.equals(lexeme, "int[]")){
+                            token = tokens.ARRAY;
+                            addTokenObject(token,lexeme);
+                            break;
+                            } else if(Objects.equals(lexeme, "double[]")){
+                            token = tokens.ARRAY;
+                            addTokenObject(token,lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "String[]")){
+                            token = tokens.ARRAY;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (Objects.equals(lexeme, "boolean[]")){
+                            token = tokens.ARRAY;
+                            addTokenObject(token, lexeme);
+                            break;
+                        }else if (Objects.equals(lexeme, "main")) {
                             token = tokens.DRIVER;
                             lexeme = "main";
                             addTokenObject(token, lexeme);

@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,10 @@ public class Converter {
                         i += 4;
                         pythonText += tokenList.get(i).lexeme + " ";
 
+                        String arrayName = "";
+                        boolean arrayDiscovered = false;
+                        int arrayDecIndex = 0;
+
                         //Skip lexemes until the end range is found
                         int counter = 0;
                         while (counter < 2) {
@@ -43,9 +48,24 @@ public class Converter {
                                     break;
                                 }
                             }
-                            i++;
-                        }
 
+                            if (tokenList.get(i).lexeme.equals("[") && tokenList.get(i + 1).lexeme.equals("]")) {
+                                arrayName = tokenList.get(i + 2).lexeme;
+                                arrayDiscovered = true;
+                            }
+
+                            /*
+                            if (tokenList.get(i).token == Interpreter.tokens.ARRAY) {
+                                arrayName = tokenList.get(i+1).lexeme; // array name comes after array declaration
+                                arrayDecIndex = i;
+                            }
+                            */
+
+
+                        }
+                        /*STOPPING HERE FOR NOW
+                        Main issue - Need a way to keep array names from being removed due to the period rule in the interpreter.
+                         */
                         pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
                         i++; //This is to skip the lexeme ")"
 
@@ -111,7 +131,7 @@ public class Converter {
                     case DECLARATION:
                         String replacedString = "";
                         if (tokenList.get(i).lexeme.equals("int")) {
-                            replacedString = tokenList.get(i).lexeme.replace("int", "\t");
+                            replacedString = tokenList.get(i).lexeme.replace("int", "");
                             pythonText += replacedString;
                         }
                         break;
@@ -212,6 +232,21 @@ public class Converter {
         tokenList.get(start).lexeme = "f\"" + tokenList.get(start).lexeme;
         tokenList.get(end - 1).lexeme += "\"";
         return tokenList;
+    }
+
+    /**
+     *
+     * @param tokenList The list of lexemes and their tokens to be checked.
+     * @param start The index to start from within the tokenList
+     * @return the index of the first array declared after the starting index.
+     */
+    public static int getNextArrDeclaration(ArrayList<Interpreter.tokenInfo> tokenList, int start){
+        for (int i = start; i < tokenList.size(); i++){
+            if (tokenList.get(i).token.equals(Interpreter.tokens.ARRAY)){
+                return i; // Return index of the first array declaration.
+            }
+        }
+        return -1; //Could not find any array after given index.
     }
 
     public static String cleanString(String s) {
