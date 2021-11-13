@@ -46,6 +46,10 @@ public class Converter {
                             i++;
                         }
 
+                        if (tokenList.get(i).token == Interpreter.tokens.INTEGER){
+
+                        }
+
                         pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
                         i++; //This is to skip the lexeme ")"
 
