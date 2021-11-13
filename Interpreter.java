@@ -268,9 +268,7 @@ public class Interpreter {
                             tokenList.get(tokenList.size()-1).special = true;
                         } else if (token == tokens.NEW_LINE){
                             tokenList.get(tokenList.size()-1).special = true;
-                        } else if (token == tokens.NEW_TAB) {
-                            tokenList.get(tokenList.size()-1).special = true;
-                        }
+                        } 
                     }
                     break;
                 default:
