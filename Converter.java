@@ -76,11 +76,6 @@ public class Converter {
 //                            i++;
 //                        }
                         break;
-                    case NEW_TAB:
-                        //This is intended to handle new_tab characters
-                        pythonText += tokenList.get(i).lexeme;
-                        break;
-
                     case IMPORT:
                         //currently, there are no supported libraries to import so this
                         //will exist exclusively to skip all contents that follow import
