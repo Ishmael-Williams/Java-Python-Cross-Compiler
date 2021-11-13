@@ -97,9 +97,6 @@ public class Converter {
                         break;
                     case SEMI_COLON:
                         break;
-                    case COMMA:
-                        pythonText += tokenList.get(i).lexeme;
-                        break;
                 }
             } else {
                 switch (tokenList.get(i).token) {
