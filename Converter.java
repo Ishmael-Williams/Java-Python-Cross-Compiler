@@ -28,6 +28,26 @@ public class Converter {
                     case ARRAY_DECLARATION:
                         pythonText += "[]";
                         break;
+                    case ASSIGN_OP:
+                        //To check for cases where the assignment operator is followed by
+                        //an array initialization, which uses [] in Python instead of the {} in Java
+                        i++;
+                        while (tokenList.get(i).token == Interpreter.tokens.SPACE) {
+                            i++;
+                        }
+                        if (tokenList.get(i).token == Interpreter.tokens.L_BRCE) {
+                            pythonText += " = [";
+                            i++; //skip the "{"
+                            while (tokenList.get(i).token != Interpreter.tokens.R_BRCE) {
+                                pythonText += tokenList.get(i).lexeme;
+                                i++;
+                            }
+                            pythonText += " ]";
+                            break;
+                        } else {
+                            pythonText += " = ";
+                            break;
+                        }
                     case DATA_TYPE:
                         break;
                     case DRIVER:
@@ -57,14 +77,24 @@ public class Converter {
                         if (tokenList.get(i).token == Interpreter.tokens.INTEGER) {
                             pythonText += " in range(" + tokenList.get(i).lexeme + "):\n\t\t";
                         } else if (tokenList.get(i).token == Interpreter.tokens.LENGTH_FUNC) {
-                            pythonText += " in range(" + findSize(tokenList.get(i - 1).lexeme)+ "):\n\t\t";
+                            int size = findSize(tokenList.get(i - 1).lexeme);
+                            if (size == 0) {
+                                pythonText += " in range(len(" + tokenList.get(i - 1).lexeme + ")):\n\t\t";
+                            } else {
+                                pythonText += " in range(" + findSize(tokenList.get(i - 1).lexeme) + "):\n\t\t";
+                            }
                         }
                         while (tokenList.get(i).token != Interpreter.tokens.R_PAREN) {
                             i++;
                         }
                         break;
                     case LENGTH_FUNC:
-                        pythonText +=  findSize(tokenList.get(i - 1).lexeme);
+                        int size = findSize(tokenList.get(i - 1).lexeme);
+                        if (size == 0) {
+                            pythonText += " len(" + tokenList.get(i - 1).lexeme + ")";
+                        } else {
+                            pythonText += findSize(tokenList.get(i - 1).lexeme);
+                        }
                         break;
                     case NEXT_INT:
                         //This case currently doesn't support adding the print text to prompt the user to input something, into the
@@ -225,10 +255,11 @@ public class Converter {
 
     /**
      * Handles and converts a for loop starting at the provided index.
+     *
      * @param index current index of the tokenList.
      * @return new index in the tokenList
      */
-    public static int forLoopHandler(int index){
+    public static int forLoopHandler(int index) {
         boolean assignmentIncluded = false;
         boolean valueIncluded = false;
         boolean comparatorIncluded = false;
@@ -242,11 +273,11 @@ public class Converter {
         String forLoopText = "for "; //for debugging purposes. Want to see the python loop statement
         //index += 2;
 
-        while (tokenList.get(index).token != Interpreter.tokens.R_PAREN){
-            if(tokenList.get(index).token == Interpreter.tokens.IDENTIFIER){
+        while (tokenList.get(index).token != Interpreter.tokens.R_PAREN) {
+            if (tokenList.get(index).token == Interpreter.tokens.IDENTIFIER) {
                 identifier = tokenList.get(index).lexeme;
-                while(tokenList.get(index).token != Interpreter.tokens.SEMI_COLON || tokenList.get(index).token
-                        != Interpreter.tokens.R_PAREN){
+                while (tokenList.get(index).token != Interpreter.tokens.SEMI_COLON || tokenList.get(index).token
+                        != Interpreter.tokens.R_PAREN) {
                     if (tokenList.get(index).token == Interpreter.tokens.ASSIGN_OP)
                         /*If we are in the declaration part of the loop statement, the range should be in the
                         next part, disregard range until next semicolon delimiter.*/
@@ -256,10 +287,10 @@ public class Converter {
                         valueIncluded = true;
                         val = Integer.parseInt(tokenList.get(index).lexeme);
                     }
-                    if(tokenList.get(index+1).token == Interpreter.tokens.SEMI_COLON){
-                        semicolonIndex = index+1;
+                    if (tokenList.get(index + 1).token == Interpreter.tokens.SEMI_COLON) {
+                        semicolonIndex = index + 1;
                     }
-                    if(tokenList.get(index).token == Interpreter.tokens.LESS_THAN){
+                    if (tokenList.get(index).token == Interpreter.tokens.LESS_THAN) {
                         /*If we are in the comparator part of the loop statement, the range should be in the
                         this part, disregard assignment check.*/
                         comparatorIncluded = true;
@@ -269,7 +300,7 @@ public class Converter {
                     }
                     index++;
                 }
-                if(valueIncluded && comparatorIncluded && rangeIncluded)
+                if (valueIncluded && comparatorIncluded && rangeIncluded)
                     validForLoop = true;
             }
             index++;
