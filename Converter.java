@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Converter {
     static String pythonText = "";
@@ -19,25 +20,33 @@ public class Converter {
         pythonText = "";
         //for each token in tokenList, determine the Python equivalent
         for (int i = 0; i < tokenList.size(); i++) {
+            if (tokenList.get(i).ignore == true)
+                continue;
+
             if (tokenList.get(i).special) {
                 switch (tokenList.get(i).token) {
+                    case ARRAY_DECLARATION:
+                        pythonText += "[]";
+                        break;
                     case DATA_TYPE:
                         break;
                     case DRIVER:
-                        pythonText += "def " + tokenList.get(i).lexeme + "():\n\t";
-                        i += 8;
+                        pythonText += "def main():\n\t";
                         continue;
                     case FOR:
                         //Presently only accounts for a range of 0 to n. If the code specifies a starting range other than 0, that is not accounted for.
                         //Skip lexemes between "for" and the declaration of "i"
                         pythonText += tokenList.get(i).lexeme + " ";
-                        i += 4;
-                        pythonText += tokenList.get(i).lexeme + " ";
+                        while (tokenList.get(i).token != Interpreter.tokens.IDENTIFIER) {
+                            i++;
+                        }
+                        pythonText += tokenList.get(i).lexeme;
 
                         //Skip lexemes until the end range is found
                         int counter = 0;
                         while (counter < 2) {
-                            if (tokenList.get(i).token == Interpreter.tokens.INTEGER) {
+                            if (tokenList.get(i).token == Interpreter.tokens.INTEGER ||
+                                    tokenList.get(i).token == Interpreter.tokens.LENGTH_FUNC) {
                                 counter++;
                                 if (counter == 2) {
                                     break;
@@ -45,32 +54,23 @@ public class Converter {
                             }
                             i++;
                         }
-
-                        if (tokenList.get(i).token == Interpreter.tokens.INTEGER){
-
+                        if (tokenList.get(i).token == Interpreter.tokens.INTEGER) {
+                            pythonText += " in range(" + tokenList.get(i).lexeme + "):\n\t\t";
+                        } else if (tokenList.get(i).token == Interpreter.tokens.LENGTH_FUNC) {
+                            pythonText += " in range(" + findSize(tokenList.get(i - 1).lexeme)+ "):\n\t\t";
                         }
-
-                        pythonText += "in range(" + tokenList.get(i).lexeme + "):\n\t\t";
-                        i++; //This is to skip the lexeme ")"
-
-                        //Skip ")" and several formatting lexemes such as '\n' and '\t'
-                        counter = 0;
-                        while (counter < 1) {
-                            if (tokenList.get(i).token == Interpreter.tokens.IDENTIFIER) {
-                                counter++;
-                                i += 4;
-                            }
-                            if (counter == 1)
-                                break;
-                            else
-                                i++;
+                        while (tokenList.get(i).token != Interpreter.tokens.R_PAREN) {
+                            i++;
                         }
+                        break;
+                    case LENGTH_FUNC:
+                        pythonText +=  findSize(tokenList.get(i - 1).lexeme);
                         break;
                     case NEXT_INT:
                         //This case currently doesn't support adding the print text to prompt the user to input something, into the
                         //the parantheses of the function itself. That is fairly complex and possibly not worth implementing.
                         pythonText += " input()";
-                        i+=2;
+                        i += 2;
                         break;
                     case NEW_LINE:
                         //This case is intended to resolve excess new_line characters, but doesn't work and ruins output
@@ -129,8 +129,8 @@ public class Converter {
 
                         break;
                     case STRING:
-                        System.out.println("STRING!!! -> " + tokenList.get(i).lexeme);
-                        tokenList.get(i).lexeme = cleanString(tokenList.get(i).lexeme);
+//                        System.out.println("STRING!!! -> " + tokenList.get(i).lexeme);
+//                        tokenList.get(i).lexeme = cleanString(tokenList.get(i).lexeme);
 //                        tokenList.get(i).lexeme = tokenList.get(i).lexeme.replace('"', ' ');
 
                         pythonText += tokenList.get(i).lexeme;
@@ -147,6 +147,19 @@ public class Converter {
         System.out.println(pythonText);
         gui.EP.setText(pythonText);
         checkAccuracy(pythonText);
+    }
+
+    // Find the size corresponding to an object or array.
+    // Searches for the first occurrence of the name, where the object or array was first initialized
+    // and the size was explicitly stored for that token
+    public static int findSize(String lexeme) {
+        int index = 0;
+        int size = 0;
+        while (!Objects.equals(lexeme, tokenList.get(index).lexeme)) {
+            index++;
+        }
+        size = tokenList.get(index).size;
+        return size;
     }
 
     /**
@@ -210,6 +223,66 @@ public class Converter {
         return tokenList;
     }
 
+    /**
+     * Handles and converts a for loop starting at the provided index.
+     * @param index current index of the tokenList.
+     * @return new index in the tokenList
+     */
+    public static int forLoopHandler(int index){
+        boolean assignmentIncluded = false;
+        boolean valueIncluded = false;
+        boolean comparatorIncluded = false;
+        boolean rangeIncluded = false;
+        boolean validForLoop = false;
+        int semicolonIndex = 0;
+        int val = 0;
+        String identifier = "";
+
+        pythonText += "for ";
+        String forLoopText = "for "; //for debugging purposes. Want to see the python loop statement
+        //index += 2;
+
+        while (tokenList.get(index).token != Interpreter.tokens.R_PAREN){
+            if(tokenList.get(index).token == Interpreter.tokens.IDENTIFIER){
+                identifier = tokenList.get(index).lexeme;
+                while(tokenList.get(index).token != Interpreter.tokens.SEMI_COLON || tokenList.get(index).token
+                        != Interpreter.tokens.R_PAREN){
+                    if (tokenList.get(index).token == Interpreter.tokens.ASSIGN_OP)
+                        /*If we are in the declaration part of the loop statement, the range should be in the
+                        next part, disregard range until next semicolon delimiter.*/
+                        assignmentIncluded = true;
+                    rangeIncluded = false;
+                    if (tokenList.get(index).token == Interpreter.tokens.INTEGER) {
+                        valueIncluded = true;
+                        val = Integer.parseInt(tokenList.get(index).lexeme);
+                    }
+                    if(tokenList.get(index+1).token == Interpreter.tokens.SEMI_COLON){
+                        semicolonIndex = index+1;
+                    }
+                    if(tokenList.get(index).token == Interpreter.tokens.LESS_THAN){
+                        /*If we are in the comparator part of the loop statement, the range should be in the
+                        this part, disregard assignment check.*/
+                        comparatorIncluded = true;
+                        assignmentIncluded = false;
+                        rangeIncluded = true;
+
+                    }
+                    index++;
+                }
+                if(valueIncluded && comparatorIncluded && rangeIncluded)
+                    validForLoop = true;
+            }
+            index++;
+        }
+
+        if (validForLoop) {
+            pythonText += identifier + "in range(" + val + "):\n\t";
+            forLoopText += identifier + "in range(" + val + "):\n\t";
+            System.out.println("FOR LOOP STATEMENT: " + forLoopText);
+        }
+        return index;
+    }
+
     public static String cleanString(String s) {
         System.out.println("String before cleaning " + s);
         StringBuilder sb = new StringBuilder(s);
@@ -224,7 +297,7 @@ public class Converter {
 
     public static int printHandler(int index) {
         pythonText += "print(f\"";
-        index += 2;
+        index++;
         while (tokenList.get(index).token != Interpreter.tokens.R_PAREN) {
             if (tokenList.get(index).token == Interpreter.tokens.IDENTIFIER) {
                 tokenList.get(index).lexeme = "{" + tokenList.get(index).lexeme + "}";
@@ -233,7 +306,7 @@ public class Converter {
                 tokenList.get(index).lexeme = cleanString(tokenList.get(index).lexeme);
                 pythonText += tokenList.get(index).lexeme;
             } else {
-                System.out.println("This token :" + tokenList.get(index).token.toString() + ", is not yet supported in print calls");
+                System.out.println("The token " + tokenList.get(index).token.toString() + " is not yet supported in print calls");
             }
             index++;
         }
