@@ -38,8 +38,8 @@ public class Interpreter {
     static File file = new File("");
     //Global variables
     static boolean usesSpace = false;
-    static int currentChar;
-    static int charClass;
+    static int currentChar = ' ';
+    static int charClass = SPACE;
     //Token codes
     static String lexeme;
     static tokens token;
@@ -87,6 +87,7 @@ public class Interpreter {
     }
 
     static void lexer() throws IOException {
+        getChar();
         while (currentChar != -1) {
             lexeme = "";
             addChar();
@@ -97,7 +98,7 @@ public class Interpreter {
                     token = tokens.INTEGER;
                     while (isWhitespace(currentChar) == false) {
                         getChar();
-                        if (isWhitespace(currentChar) || currentChar == ';') {
+                        if (isWhitespace(currentChar) || currentChar == ';' || currentChar == ',' || currentChar == '}') {
                             addTokenObject(token, lexeme);
                             break;
                         }
@@ -295,8 +296,12 @@ public class Interpreter {
                         lookup();
                         addTokenObject(token, lexeme);
                         if (token == tokens.SEMI_COLON) {
-                            tokenList.get(tokenList.size() - 1).special = true;
+                            tokenList.get(tokenList.size() - 1).ignore = true;
                         } else if (token == tokens.NEW_LINE) {
+                            tokenList.get(tokenList.size() - 1).special = true;
+                        } else if (token == tokens.L_BRCE || token == tokens.R_BRCE){
+                            tokenList.get(tokenList.size() - 1).ignore = true;
+                        } else if (token == tokens.ASSIGN_OP){
                             tokenList.get(tokenList.size() - 1).special = true;
                         }
                     }
@@ -304,8 +309,17 @@ public class Interpreter {
                 default:
                     throw new IllegalStateException("Unexpected value: " + charClass);
             }
-            getChar();
+//            if (charClass == OTHER)
+//                getChar();
+
+            if (tokenList.get(tokenList.size()-1).token != tokens.INTEGER )
+                getChar();
+
+//            while (isWhitespace(currentChar))
+//                getChar();
+
         }
+
     }
 
     /*  lexer functions for assigning classes and tokens   */
@@ -374,8 +388,8 @@ public class Interpreter {
         contents = contents.replace("public ", "");
         contents = contents.replace("static ", "");
         contents = contents.replace("void ", "");
-        contents = contents.replace("{", "");
-        contents = contents.replace("}", "");
+//        contents = contents.replace("{", "");
+//        contents = contents.replace("}", "");
 //        contents = contents.replace(";", "");
 
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
@@ -396,7 +410,7 @@ public class Interpreter {
     public static void runInterpreter() throws IOException {
         tokenList.clear();
         cleanInput();
-        getChar();
+
         lexer();
         System.out.println("The current token is: " + token + "\n");
         reader.close();
