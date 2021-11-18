@@ -31,7 +31,6 @@ public class Converter {
                     case ASSIGN_OP:
                         //To check for cases where the assignment operator is followed by
                         //an array initialization, which uses [] in Python instead of the {} in Java
-                        i++;
                         while (tokenList.get(i).token == Interpreter.tokens.SPACE) {
                             i++;
                         }
@@ -77,11 +76,11 @@ public class Converter {
                         if (tokenList.get(i).token == Interpreter.tokens.INTEGER) {
                             pythonText += " in range(" + tokenList.get(i).lexeme + "):\n\t\t";
                         } else if (tokenList.get(i).token == Interpreter.tokens.LENGTH_FUNC) {
-                            int size = findSize(tokenList.get(i - 1).lexeme);
+                            int size = findSize(tokenList.get(i - 2).lexeme);
                             if (size == 0) {
-                                pythonText += " in range(len(" + tokenList.get(i - 1).lexeme + ")):\n\t\t";
+                                pythonText += " in range(len(" + tokenList.get(i - 2).lexeme + ")):\n\t\t";
                             } else {
-                                pythonText += " in range(" + findSize(tokenList.get(i - 1).lexeme) + "):\n\t\t";
+                                pythonText += " in range(" + size + "):\n\t\t";
                             }
                         }
                         while (tokenList.get(i).token != Interpreter.tokens.R_PAREN) {
@@ -99,7 +98,7 @@ public class Converter {
                     case NEXT_INT:
                         //This case currently doesn't support adding the print text to prompt the user to input something, into the
                         //the parantheses of the function itself. That is fairly complex and possibly not worth implementing.
-                        pythonText += " input()";
+                        pythonText += " input(";
                         i += 2;
                         break;
                     case NEW_LINE:
@@ -176,7 +175,7 @@ public class Converter {
         pythonText += "\nif __name__ == \"__main__\": \n\tmain()";
         System.out.println(pythonText);
         gui.EP.setText(pythonText);
-        checkAccuracy(pythonText);
+        //checkAccuracy(pythonText);
     }
 
     // Find the size corresponding to an object or array.

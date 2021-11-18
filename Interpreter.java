@@ -39,12 +39,16 @@ public class Interpreter {
     //Global variables
     static boolean usesSpace = false;
     static int currentChar = ' ';
+    static int foreChar = ' ';
     static int charClass = SPACE;
+    static int foreCharClass = SPACE;
     //Token codes
     static String lexeme;
     static tokens token;
     static FileReader reader;
     static BufferedReader buffReader;
+    static FileReader foreReader;
+    static BufferedReader foreBuffReader;
     static String tokenText;
     static ArrayList<tokenInfo> tokenList = new ArrayList<tokenInfo>();
     private static GUI gui;
@@ -70,7 +74,7 @@ public class Interpreter {
         L_BRCE, L_BRCT, LENGTH_FUNC, L_PAREN, LESS_THAN, lESS_THAN_OR_EQUAL,
         MULT_OP,
         NEW, NEW_LINE, NEW_TAB, NEXT_INT,
-        PARAMETER, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
+        PARAMETER, PERIOD, PRIMITIVE_DATA_TYPE, PUBLIC, //"PARAMETER" is conditionally derived and must appear in function declaration
         R_BRCE, R_BRCT, R_PAREN,
         SCANNER, SEMI_COLON, SPACE, STATIC, STRING, SUB_OP,
         UNKNOWN,
@@ -88,7 +92,7 @@ public class Interpreter {
 
     static void lexer() throws IOException {
         getChar();
-        while (currentChar != -1) {
+        while (foreChar != -1) {
             lexeme = "";
             addChar();
 
@@ -96,18 +100,151 @@ public class Interpreter {
                 case DIGIT:
                     //A condition must still be added that accounts for decimals.
                     token = tokens.INTEGER;
-                    while (isWhitespace(currentChar) == false) {
-                        getChar();
-                        if (isWhitespace(currentChar) || currentChar == ';' || currentChar == ',' || currentChar == '}') {
+
+                    if (isDelimiter(foreChar)){
+                        addTokenObject(token, lexeme);
+                        break;
+                    } else {
+                        while (isWhitespace(foreChar) == false) {
+                            getChar();
+                            addChar();
+                            if (isWhitespace(foreChar) || foreChar == ';' || foreChar == ',' || foreChar == '}') {
+                                addTokenObject(token, lexeme);
+                                break;
+                            }
+                        }
+                    }
+
+                    break;
+                case LETTER:
+                    //Accounting for valid single letter identifiers and other tokens
+
+                    if (isDelimiter(foreChar)){
+                        /*Assumption: if case LETTER is encountered and the very first letter processed
+                          is immediately followed by a whitespace, then the one letter is a variable identifier.
+                          It could also be user error in manual input, but we won't handle that yet.
+                        */
+                        token = tokens.IDENTIFIER;
+                        addTokenObject(token, lexeme);
+                        break;
+                    }
+                    //Accounting for multi-letter identifiers and other tokens
+                    while (isWhitespace(foreChar) == false || foreChar != ';') {
+                        /* Check the char following the current lexeme for special cases:
+                         * - Flow control statements
+                         * - functions
+                         * - arrays
+                         * */
+                        if (foreChar == ',') {
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (foreChar == ')') {
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (foreChar == '(') {
+                            if (Objects.equals(lexeme, "for")) {
+                                token = tokens.FOR;
+                                addTokenObject(token, lexeme);
+                                tokenList.get(tokenList.size() - 1).special = true;
+                            } else if (Objects.equals(lexeme, "nextInt")) {
+                                token = tokens.NEXT_INT;
+                                addTokenObject(token, lexeme);
+                                tokenList.get(tokenList.size() - 1).special = true;
+                            } else {
+                                token = tokens.UNKNOWN;
+                                addTokenObject(token, lexeme);
+                            }
+
+                            //After processing the name and token for the function call up to this point, process the "(" the system is in possession of.
+                            lookup();
+                            lexeme = Character.toString(currentChar);
+                            addTokenObject(token, lexeme);
+                            break;
+                        } else if (foreChar == '[' && tokenList.get(tokenList.size() - 2).token == tokens.NEW) {
+                            /*3 possible cases for encountering a "[" character:
+                             * 1 - ARRAY_GENERIC = "int[]"
+                             *          ignore this token
+                             * 2 - ARRAY_REFERENCE = "varName[any_integer]"
+                             *          write this token as is
+                             * 3 - ARRAY_DECLARATION = "varName = new int[any_integer]"
+                             *          In the case of "new" followed by anyDatatype[], capture its size for varName that precedes it
+                             * */
+
+
+                            //Current case = 3; occurrence of "[" was preceded by "new"
+                            //Find the entire integer that will determine the size of the array being declared
+                            //Continue to get and add chars until the lexeme looks like "data_type[any_integer]"
+                            String arraySize = "";
+                            //Get and add "["
+                            getChar();
+                            addChar();
+                            //while each character grabbed is a digit, add it to the lexeme
+                            while(foreCharClass == DIGIT){
+                                getChar();
+                                addChar();
+                                arraySize+=Character.toString(currentChar);
+                            }
+                            //Get and add "]"
+                            getChar();
+                            addChar();
+                            //Trace back through the tokens to find the identifier token corresponding
+                            //to the new array being declared, assign it the integer size that was found
+                            int i = tokenList.size()-1;
+                            while (tokenList.get(i).token != tokens.IDENTIFIER) {
+                                i--;
+                            }
+                            tokenList.get(i).size = Integer.parseInt(arraySize);
+                            token = tokens.ARRAY_DECLARATION;
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
+                            break;
+                        }  else if(foreChar == '[' && (Objects.equals(lexeme, "int") || Objects.equals(lexeme, "boolean") ||
+                                Objects.equals(lexeme, "String") || Objects.equals(lexeme, "double"))){
+                            //Current case = 1; ARRAY_GENERIC
+                            //continue to get and add chars to the lexeme until it looks like "data_type[]"
+                            //Grab "[" and "]"
+                            getChar();
+                            addChar();
+                            getChar();
+                            addChar();
+                            token = tokens.ARRAY_GENERIC;
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).ignore = true;
+                            break;
+                        }  else if(foreChar == '['){
+                            //Current case = 2; ARRAY_REFERENCE
+                            //Continue to get and add chars until the lexeme looks like "varName[any_integer]"
+                            getChar();
+                            addChar();
+                            while(foreChar != ']'){
+                                getChar();
+                                addChar();
+                            }
+                            getChar();
+                            addChar();
+                            token = tokens.ARRAY_REFERENCE;
                             addTokenObject(token, lexeme);
                             break;
                         }
-                        addChar();
-                    }
-                    break;
-                case LETTER:
-                    while (isWhitespace(currentChar) == false) {
+
+                        //Check for classes and objects between periods, such as
+                        //"array.length" where we want to collect and tag "array"
+                        if (foreChar == '.'){
+                            token = tokens.IDENTIFIER;
+                            addTokenObject(token, lexeme);
+                            /* Tokens preceding a period are ignored for now but later can
+                             * be retrieved for special uses, such as when a lexeme's name "arrayName" precedes
+                             * ".length" and must be collected to write the natural python conversion "len(arrayName)"
+                             */
+                            tokenList.get(tokenList.size()-1).ignore = true;
+                            break;
+                        }
+
                         getChar();
+                        addChar();
+
                         //Compare the current lexeme against the set of supported lexemes
                         if (Objects.equals(lexeme, "if")) {
                             token = tokens.IF;
@@ -117,21 +254,22 @@ public class Interpreter {
                             token = tokens.WHILE;
                             addTokenObject(token, lexeme);
                             break;
-                        } else if (Objects.equals(lexeme, "int") && currentChar == ' ') {
+                        } else if (Objects.equals(lexeme, "int") && foreChar == ' ') {
                             token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "main")) {
                             token = tokens.DRIVER;
-                            addChar();
-                            while(currentChar != ')'){
+                            while(foreChar != ')'){
                                 getChar();
                                 addChar();
                             }
+                            getChar();
+                            addChar();
                             addTokenObject(token, lexeme);
                             tokenList.get(tokenList.size() - 1).special = true;
                             break;
-                        } else if (Objects.equals(lexeme, "String") && currentChar == ' ') {
+                        } else if (Objects.equals(lexeme, "String") && foreChar == ' ') {
                             token = tokens.DATA_TYPE;
                             addTokenObject(token, lexeme);
                             break;
@@ -163,130 +301,23 @@ public class Interpreter {
                             addTokenObject(token, lexeme);
                             tokenList.get(tokenList.size() - 1).ignore = true;
                             break;
-                        }
-                        /* Check the char following the current lexeme for special cases:
-                         * - Flow control statements
-                         * - functions
-                         * - arrays
-                         * */
-                        if (currentChar == ' ' || currentChar == ';') {
+                        } else if (foreChar == ' ' || foreChar == ';') {
                             token = tokens.IDENTIFIER;
-                            addTokenObject(token, lexeme);
-                            break;
-                        } else if (currentChar == ',') {
-                            token = tokens.IDENTIFIER;
-                            addTokenObject(token, lexeme);
-                            break;
-                        } else if (currentChar == ')') {
-                            token = tokens.IDENTIFIER;
-                            addTokenObject(token, lexeme);
-                            lookup();
-                            lexeme = Character.toString(currentChar);
-                            addTokenObject(token, lexeme);
-                            break;
-                        } else if (currentChar == '(') {
-                            if (Objects.equals(lexeme, "for")) {
-                                token = tokens.FOR;
-                                addTokenObject(token, lexeme);
-                                tokenList.get(tokenList.size() - 1).special = true;
-                            } else if (Objects.equals(lexeme, "nextInt")) {
-                                token = tokens.NEXT_INT;
-                                addTokenObject(token, lexeme);
-                                tokenList.get(tokenList.size() - 1).special = true;
-                            } else {
-                                token = tokens.UNKNOWN;
-                                addTokenObject(token, lexeme);
-                            }
-
-                            //After processing the name and token for the function call up to this point, process the "(" the system is in possession of.
-                            lookup();
-                            lexeme = Character.toString(currentChar);
-                            addTokenObject(token, lexeme);
-                            break;
-                        } else if (currentChar == '[' && tokenList.get(tokenList.size() - 1).token == tokens.NEW) {
-                            /*3 possible cases for encountering a "[" character:
-                             * 1 - ARRAY_GENERIC = "int[]"
-                             *          ignore this token
-                             * 2 - ARRAY_REFERENCE = "varName[any_integer]"
-                             *          write this token as is
-                             * 3 - ARRAY_DECLARATION = "varName = new int[any_integer]"
-                             *          In the case of "new" followed by anyDatatype[], capture its size for varName that precedes it
-                             * */
-
-                            addChar();
-                            //Current case = 3; occurrence of "[" was preceded by "new"
-                            //Find the entire integer that will determine the size of the array being declared
-                            //Continue to get and add chars until the lexeme looks like "data_type[any_integer]"
-                            String arraySize = "";
-                            getChar();
-                            while(charClass == DIGIT){
-                                arraySize+=Character.getNumericValue(currentChar);
-                                addChar();
-                                getChar();
-                                addChar();
-                            }
-
-                            //Trace back through the tokens to find the identifier token corresponding
-                            //to the new array being declared, assign it the integer size that was found
-                            int i = tokenList.size()-1;
-                            while (tokenList.get(i).token != tokens.IDENTIFIER) {
-                                i--;
-                            }
-                            tokenList.get(i).size = Integer.parseInt(arraySize);
-                            token = tokens.ARRAY_DECLARATION;
-                            addTokenObject(token, lexeme);
-                            tokenList.get(tokenList.size()-1).special = true;
-                            break;
-                        }  else if(Objects.equals(lexeme, "int") || Objects.equals(lexeme, "boolean") ||
-                                Objects.equals(lexeme, "String") || Objects.equals(lexeme, "double")){
-                            //Current case = 3; ARRAY_GENERIC
-                            //continue to get and add chars to the lexeme until it looks like "data_type[]"
-                            addChar();
-                            getChar();
-                            addChar();
-                            token = tokens.ARRAY_GENERIC;
-                            addTokenObject(token, lexeme);
-                            tokenList.get(tokenList.size()-1).ignore = true;
-                            break;
-                        }  else if(currentChar == '['){
-                            //Current case = 2; ARRAY_REFERENCE
-                            //Continue to get and add chars until the lexeme looks like "varName[any_integer]"
-                            addChar();
-                            while(currentChar != ']'){
-                                getChar();
-                                addChar();
-                            }
-                            token = tokens.ARRAY_REFERENCE;
                             addTokenObject(token, lexeme);
                             break;
                         }
 
-                        //Check for classes and objects between periods, such as
-                        //"array.length" where we want to collect and tag "array"
-                        if (currentChar == '.'){
-                          token = tokens.IDENTIFIER;
-                          addTokenObject(token, lexeme);
-
-                          /* Tokens preceding a period are ignored for now but later can
-                           * be retrieved for special uses, such as when a lexeme's name "arrayName" precedes
-                           * ".length" and must be collected to write the natural python conversion "len(arrayName)"
-                           */
-                            tokenList.get(tokenList.size()-1).ignore = true;
-                            break;
-                        }
-
-                        addChar();
-                        System.out.println("Current lexeme: " + lexeme);
+                            System.out.println("Current lexeme: " + lexeme);
                     }
                     break;
 
                 case OTHER:
-                    if (currentChar == '\"') {
+                    if (foreChar == '\"') {
                         token = tokens.STRING;
                         usesSpace = true;
                         getChar();
                         addChar();
-                        while (currentChar != '\"') {
+                        while (foreChar != '\"') {
                             getChar();
                             addChar();
                         }
@@ -303,6 +334,8 @@ public class Interpreter {
                             tokenList.get(tokenList.size() - 1).ignore = true;
                         } else if (token == tokens.ASSIGN_OP){
                             tokenList.get(tokenList.size() - 1).special = true;
+                        } else if (token == tokens.PERIOD){
+                            tokenList.get(tokenList.size() - 1).ignore = true;
                         }
                     }
                     break;
@@ -312,32 +345,23 @@ public class Interpreter {
 //            if (charClass == OTHER)
 //                getChar();
 
-            if (tokenList.get(tokenList.size()-1).token != tokens.INTEGER )
-                getChar();
-
-//            while (isWhitespace(currentChar))
+//            if (tokenList.get(tokenList.size()-1).token != tokens.INTEGER )
 //                getChar();
+            getChar();
+
 
         }
 
     }
 
     /*  lexer functions for assigning classes and tokens   */
-    static void getNonBlank() throws IOException {
-        while (isWhitespace(currentChar)) {
-            currentChar = buffReader.read();
-        }
-    }
-
     static void addChar() {
         lexeme += (char) currentChar;
     }
 
     static void getChar() throws IOException {
         currentChar = buffReader.read();
-//        while (isWhitespace(currentChar) && usesSpace == false) {
-//            currentChar = buffReader.read();
-//        }
+        foreChar = foreBuffReader.read();
 
         if (currentChar != EOF) {
             if (Character.isLetter(currentChar))
@@ -348,6 +372,16 @@ public class Interpreter {
                 charClass = SPACE;
             else charClass = OTHER;
         } else charClass = EOF;
+
+        if (foreChar != EOF) {
+            if (Character.isLetter(foreChar))
+                foreCharClass = LETTER;
+            else if (Character.isDigit(foreChar))
+                foreCharClass = DIGIT;
+            else if (isWhitespace(foreChar))
+                foreCharClass = SPACE;
+            else foreCharClass = OTHER;
+        } else foreCharClass = EOF;
 
         System.out.println("Char pulled: " + (char) currentChar);
         System.out.println("Class of that char: " + charClass + "\n");
@@ -370,11 +404,22 @@ public class Interpreter {
             case ']' -> token = tokens.R_BRCT;
             case ' ' -> token = tokens.SPACE;
             case '#' -> token = tokens.HASH;
+            case '.' -> token = tokens.PERIOD;
             case '\r' -> token = tokens.CR;
             case '\n' -> token = tokens.NEW_LINE;
             case '\t' -> token = tokens.NEW_TAB;
         }
 
+    }
+    //Checks to see if the upcoming char is a delimiter
+    static boolean isDelimiter(int foreChar){
+        boolean isDelimiter = false;
+        switch (foreChar) {
+            case '=', '+', ',', ';', '-', '/', '*', '(', ')',
+                 '{', '}', '[', ']', ' ', '#', '.', '\r', '\n',
+                 '\t' -> isDelimiter = true;
+        }
+        return isDelimiter;
     }
 
     static void cleanInput() throws IOException {
@@ -395,8 +440,10 @@ public class Interpreter {
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
         Files.writeString(cleanFile, contents);
         reader = new FileReader("Test Programs/cleanFile.txt");
+        foreReader = new FileReader("Test Programs/cleanFile.txt");
 
         buffReader = new BufferedReader(reader);
+        foreBuffReader = new BufferedReader(foreReader);
     }
 
     static void addTokenObject(tokens token, String lexeme) {
@@ -410,11 +457,13 @@ public class Interpreter {
     public static void runInterpreter() throws IOException {
         tokenList.clear();
         cleanInput();
-
+        foreChar = foreBuffReader.read();
         lexer();
         System.out.println("The current token is: " + token + "\n");
         reader.close();
         buffReader.close();
+        foreReader.close();
+        foreBuffReader.close();
 
         for (int i = 0; i < tokenList.size(); i++) {
             System.out.println("Token " + (i + 1) + ": \n     token - " + tokenList.get(i).token + "\n     lexeme - " + tokenList.get(i).lexeme);
