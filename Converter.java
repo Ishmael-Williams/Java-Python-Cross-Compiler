@@ -155,7 +155,7 @@ public class Converter {
                     case DECLARATION:
                         String replacedString = "";
                         if (tokenList.get(i).lexeme.equals("int")) {
-                            replacedString = tokenList.get(i).lexeme.replace("int", "\t");
+                            replacedString = tokenList.get(i).lexeme.replace("int", "");
                             pythonText += replacedString;
                         }
                         break;
