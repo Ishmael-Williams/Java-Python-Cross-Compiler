@@ -26,7 +26,26 @@ public class Converter {
             if (tokenList.get(i).special) {
                 switch (tokenList.get(i).token) {
                     case ARRAY_DECLARATION:
-                        pythonText += "[]";
+                        /*
+                            For now, all array declarations initialized with a size in Java are initialized with 0's
+                            in the python conversion. This is to avoid differentiating between:
+                                 1. new assignments in an array (requiring "array.append(newValue)" appending) or
+                                 2. reassignments to previously existing values (requiring "array[idx] = newValue" assignments)
+                            Instead opting to always reassign as there will now always be a preexisting "0" in any position
+                         */
+                        pythonText += "[";
+                        int step = i;
+                        int arraySize = 0;
+                        while (tokenList.get(step).token != Interpreter.tokens.IDENTIFIER){
+                            step--;
+                        }
+                        arraySize = tokenList.get(step).size;
+                        for (int j = 0; j < arraySize; j++){
+                            if (j+1 == arraySize)
+                                pythonText += "0] ";
+                            else
+                                pythonText += "0,";
+                        }
                         break;
                     case ASSIGN_OP:
                         //To check for cases where the assignment operator is followed by
@@ -372,8 +391,8 @@ public class Converter {
             i++;
             j++;
         }
-        gui.accuracy.setText("Accuracy results: ");
-        gui.accuracy.setText(gui.accuracy.getText() + errors + " mismatches.");
+//        gui.accuracy.setText("Accuracy results: ");
+//        gui.accuracy.setText(gui.accuracy.getText() + errors + " mismatches.");
         return isAccurate;
     }
 }

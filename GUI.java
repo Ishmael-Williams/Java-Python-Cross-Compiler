@@ -35,7 +35,8 @@ public class GUI extends Application {
     //Moved the text areas out of "start()" to make them visible outside this class
     TextArea EJ = new TextArea();
     TextArea EP = new TextArea();
-    Label accuracy = new Label("Accuracy results: ");
+
+//    Label accuracy = new Label("Accuracy results: ");
     static File inputFile = new File("");
     //A flag for keeping track of unsaved changes in the editor.
     boolean isEdited = false;
@@ -45,8 +46,8 @@ public class GUI extends Application {
         primaryStage.setTitle("Java Cross-Compiler to Python");
         /***********Label Declarations*****************/
 
-        accuracy.setFont(new Font("Serif", 30));
-        accuracy.setTextFill(Color.WHITE);
+//        accuracy.setFont(new Font("Serif", 30));
+//        accuracy.setTextFill(Color.WHITE);
         /***********Button Declarations*****************/
         Button LJ = new Button("Load File");
         Button SJ = new Button("Save");
@@ -59,12 +60,13 @@ public class GUI extends Application {
         /***********TextArea Declarations***************/
 
 
-        EJ.setPrefColumnCount(40);
+        EJ.setPrefColumnCount(45);
         EJ.setPrefRowCount(25);
         EJ.setPromptText("Enter Java code here." +
                 " You may also load existing Java files.");
-
-        EP.setPrefColumnCount(40);
+//        Font font = new Font("Calibri", EJ.getFont().getSize() + 20);
+//        EJ.setFont(font);
+        EP.setPrefColumnCount(45);
         EP.setPrefRowCount(25);
         EP.setPromptText("Python code is printed here as output.");
 
@@ -83,9 +85,10 @@ public class GUI extends Application {
         root.add(compile, 0,3);
         //root.add(SP, 3,1);
         root.add(settings, 0, 4);
-        root.add(accuracy, 0, 5);
+//        root.add(accuracy, 0, 5);
 
-        Scene scene = new Scene(root, 1000, 750);
+//        Scene scene = new Scene(root, 1000, 750);
+        Scene scene = new Scene(root, 1550, 900);
 
         //Statement to change current theme of application
         scene.getStylesheets().add("dark_mode.css");
