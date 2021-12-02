@@ -87,11 +87,16 @@ public class GUI extends Application {
         root.add(settings, 0, 4);
 //        root.add(accuracy, 0, 5);
 
-//        Scene scene = new Scene(root, 1000, 750);
-        Scene scene = new Scene(root, 1550, 900);
+//to allow dynamic window sizing. width-15 and height-80 is to allow the title bar to be displayed properly
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
 
-        //Statement to change current theme of application
-        scene.getStylesheets().add("dark_mode.css");
+//        Scene scene = new Scene(root, 1000, 750);
+//        Scene scene = new Scene(root, 1550, 900);
+          Scene scene = new Scene(root, width-15, height-80);
+          //Statement to change current theme of application
+          scene.getStylesheets().add("dark_mode.css");
 
         primaryStage.setScene(scene);
         primaryStage.show();
