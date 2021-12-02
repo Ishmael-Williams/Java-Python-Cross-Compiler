@@ -60,14 +60,14 @@ public class GUI extends Application {
         /***********TextArea Declarations***************/
 
 
-        EJ.setPrefColumnCount(45);
-        EJ.setPrefRowCount(25);
+        EJ.setPrefColumnCount(50);
+        EJ.setPrefRowCount(50);
         EJ.setPromptText("Enter Java code here." +
                 " You may also load existing Java files.");
 //        Font font = new Font("Calibri", EJ.getFont().getSize() + 20);
 //        EJ.setFont(font);
-        EP.setPrefColumnCount(45);
-        EP.setPrefRowCount(25);
+        EP.setPrefColumnCount(50);
+        EP.setPrefRowCount(50);
         EP.setPromptText("Python code is printed here as output.");
 
         /***********GridPane Declaration*****************/
@@ -84,11 +84,10 @@ public class GUI extends Application {
         root.add(SJ, 0, 2);
         root.add(compile, 0,3);
         //root.add(SP, 3,1);
-        root.add(settings, 0, 4);
+//        root.add(settings, 0, 4);
 //        root.add(accuracy, 0, 5);
 
-//        Scene scene = new Scene(root, 1000, 750);
-        Scene scene = new Scene(root, 1550, 900);
+        Scene scene = new Scene(root, 1650, 950);
 
         //Statement to change current theme of application
         scene.getStylesheets().add("dark_mode.css");

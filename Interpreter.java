@@ -67,6 +67,7 @@ public class Interpreter {
         ADD_OP, ARRAY_DECLARATION, ARRAY_GENERIC, ARRAY_REFERENCE, ASSIGN_OP,
         PRINT, CLASS, CR, COMMA,
         DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
+        ELSE, ELSE_IF, EQUALS_OP,
         FOR, FUNCTION_DECLARATION,
         GREATER_THAN, GREATER_THAN_OR_EQUAL,
         HASH,
@@ -247,16 +248,26 @@ public class Interpreter {
 
                         //Compare the current lexeme against the set of supported lexemes
                         if (Objects.equals(lexeme, "if")) {
-                            token = tokens.IF;
+                            if (tokenList.get(tokenList.size() -2).token == tokens.ELSE){
+                                tokenList.get(tokenList.size()-2).token = tokens.ELSE_IF;
+                                tokenList.get(tokenList.size()-2).lexeme = "else if";
+                            } else {
+                                token = tokens.IF;
+                                addTokenObject(token, lexeme);
+                            }
+                            break;
+                        } else if(Objects.equals(lexeme, "else")) {
+                            token = tokens.ELSE;
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "while")) {
                             token = tokens.WHILE;
                             addTokenObject(token, lexeme);
                             break;
-                        } else if (Objects.equals(lexeme, "int") && foreChar == ' ') {
+                        } else if ((Objects.equals(lexeme, "int") || Objects.equals(lexeme, "float")) && (foreChar == ' ' || foreChar == ')')){
                             token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).ignore = true;
                             break;
                         } else if (Objects.equals(lexeme, "main")) {
                             token = tokens.DRIVER;
@@ -313,6 +324,8 @@ public class Interpreter {
 
                 case OTHER:
                     if (foreChar == '\"') {
+                        //A string is being built so the lexeme is cleared of any special characters it was holding up to this point.
+                        lexeme = "";
                         token = tokens.STRING;
                         usesSpace = true;
                         getChar();
@@ -325,18 +338,36 @@ public class Interpreter {
                         addTokenObject(token, lexeme);
                     } else {
                         lookup();
-                        addTokenObject(token, lexeme);
-                        if (token == tokens.SEMI_COLON) {
-                            tokenList.get(tokenList.size() - 1).ignore = true;
-                        } else if (token == tokens.NEW_LINE) {
-                            tokenList.get(tokenList.size() - 1).special = true;
-                        } else if (token == tokens.L_BRCE || token == tokens.R_BRCE){
-                            tokenList.get(tokenList.size() - 1).ignore = true;
-                        } else if (token == tokens.ASSIGN_OP){
-                            tokenList.get(tokenList.size() - 1).special = true;
-                        } else if (token == tokens.PERIOD){
-                            tokenList.get(tokenList.size() - 1).ignore = true;
+
+                        //Search for compound operators
+                        //"==" operator
+                        if (token == tokens.ASSIGN_OP && foreChar == '='){
+                            token = tokens.EQUALS_OP;
+                            getChar();
+                            addChar();
+                            addTokenObject(token, lexeme);
+                            break;
                         }
+
+                        //Set conditions for special tokens
+                        addTokenObject(token, lexeme);
+                        if (token == tokens.SEMI_COLON)
+                            tokenList.get(tokenList.size() - 1).ignore = true;
+                        else if (token == tokens.NEW_LINE)
+                            tokenList.get(tokenList.size() - 1).special = true;
+                        else if (token == tokens.L_BRCE || token == tokens.R_BRCE)
+                            tokenList.get(tokenList.size() - 1).ignore = true;
+                        else if (token == tokens.ASSIGN_OP)
+                            tokenList.get(tokenList.size() - 1).special = true;
+                        else if (token == tokens.PERIOD)
+                            tokenList.get(tokenList.size() - 1).ignore = true;
+                        else if (token == tokens.CR)
+                            tokenList.get(tokenList.size()-1).ignore = true;
+                        else if (token == tokens.SPACE)
+                            tokenList.get(tokenList.size()-1).special = true;
+                        else if (token == tokens.L_PAREN)
+                            tokenList.get(tokenList.size()-1).special = true;
+
                     }
                     break;
                 default:
@@ -409,7 +440,6 @@ public class Interpreter {
             case '\n' -> token = tokens.NEW_LINE;
             case '\t' -> token = tokens.NEW_TAB;
         }
-
     }
     //Checks to see if the upcoming char is a delimiter
     static boolean isDelimiter(int foreChar){
@@ -444,6 +474,7 @@ public class Interpreter {
 
         buffReader = new BufferedReader(reader);
         foreBuffReader = new BufferedReader(foreReader);
+        file = new File("");
     }
 
     static void addTokenObject(tokens token, String lexeme) {

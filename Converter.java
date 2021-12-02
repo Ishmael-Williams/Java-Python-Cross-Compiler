@@ -18,6 +18,7 @@ public class Converter {
     static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList) throws IOException {
         tokenList = oldTokenList;
         pythonText = "";
+        boolean driverPresent = false;
         //for each token in tokenList, determine the Python equivalent
         for (int i = 0; i < tokenList.size(); i++) {
             if (tokenList.get(i).ignore == true)
@@ -69,7 +70,8 @@ public class Converter {
                     case DATA_TYPE:
                         break;
                     case DRIVER:
-                        pythonText += "def main():\n\t";
+                        driverPresent = true;
+                        pythonText += "def main():";
                         continue;
                     case FOR:
                         //Presently only accounts for a range of 0 to n. If the code specifies a starting range other than 0, that is not accounted for.
@@ -92,18 +94,41 @@ public class Converter {
                             }
                             i++;
                         }
+                        //Write the range depending on what type of value was given for the range, integer or a length() function call
                         if (tokenList.get(i).token == Interpreter.tokens.INTEGER) {
                             pythonText += " in range(" + tokenList.get(i).lexeme + "):\n\t\t";
                         } else if (tokenList.get(i).token == Interpreter.tokens.LENGTH_FUNC) {
-                            int size = findSize(tokenList.get(i - 2).lexeme);
-                            if (size == 0) {
-                                pythonText += " in range(len(" + tokenList.get(i - 2).lexeme + ")):\n\t\t";
-                            } else {
-                                pythonText += " in range(" + size + "):\n\t\t";
-                            }
+                            //While this commented block of code is longer necessary, I'm keeping it for a bit just in case I want to revert.
+//                            int size = findSize(tokenList.get(i - 2).lexeme);
+//                            if (size == 0) {
+//                                pythonText += " in range(len(" + tokenList.get(i - 2).lexeme + ")):\n\t\t";
+//                            } else {
+//                                pythonText += " in range(" + size + "):\n\t\t";
+//                            }
+                            pythonText += " in range(len(" + tokenList.get(i - 2).lexeme + ")):\n\t\t";
                         }
+                        //Skip to the end of the Java for loop by looking for its standard delimiter
                         while (tokenList.get(i).token != Interpreter.tokens.R_PAREN) {
                             i++;
+                        }
+                        //Skips many tokens that were creating excess new_lines
+                        break;
+                    case L_PAREN:
+                        /*
+                          1. Ignores left parentheses unless they're used for casting
+                             (Other instances of left parentheses are accounted for in their respective special cases)
+                          2. For a cast formatted  "(" "data_type" ")" "tokens.SPACE", skip the Java tokens
+                             and wrap the thing being cast in a Python compliant format: "data_type" "(" "thingToCast" ")"
+                        */
+                        String data_type = "";
+                        if (tokenList.get(i+1).token == Interpreter.tokens.DECLARATION) {
+                            data_type = tokenList.get(i+1).lexeme;
+
+                            i += 3;
+                            while (tokenList.get(i).token != Interpreter.tokens.IDENTIFIER){
+                                i++;
+                            }
+                            pythonText += data_type + "(" + tokenList.get(i).lexeme + ")";
                         }
                         break;
                     case LENGTH_FUNC:
@@ -117,8 +142,8 @@ public class Converter {
                     case NEXT_INT:
                         //This case currently doesn't support adding the print text to prompt the user to input something, into the
                         //the parantheses of the function itself. That is fairly complex and possibly not worth implementing.
-                        pythonText += " input(";
-                        i += 2;
+                        pythonText += "int(input())";
+                        i += 3;
                         break;
                     case NEW_LINE:
                         //This case is intended to resolve excess new_line characters, but doesn't work and ruins output
@@ -129,7 +154,7 @@ public class Converter {
 //                        }
                         break;
                     case IMPORT:
-                        //currently, there are no supported libraries to import so this
+                        //Currently, there are no supported libraries to import so this
                         //will exist exclusively to skip all contents that follow import
                         while (tokenList.get(i + 1).token != Interpreter.tokens.DRIVER) {
                             i++;
@@ -138,26 +163,56 @@ public class Converter {
                     case INTEGER:
                         pythonText += tokenList.get(i).lexeme;
                         break;
-                    case PRIMITIVE_DATA_TYPE:
-                        pythonText += tokenList.get(i).lexeme + "\t";
-                        break;
                     case SCANNER:
                         //All contents following "Scanner" in Java input are currently ignored
                         while (tokenList.get(i + 1).token != Interpreter.tokens.SEMI_COLON) {
                             i++;
                         }
+                        i+=4;
                         break;
                     case SEMI_COLON:
+                        break;
+                    case SPACE:
+                        //Skip the current space if the last lexeme was ignored
+                        if (tokenList.get(i-1).ignore == true)
+                            continue;
+                        pythonText += tokenList.get(i).lexeme;
                         break;
                 }
             } else {
                 switch (tokenList.get(i).token) {
                     case DECLARATION:
+                        //This case is currently never reached, as DECLARATION tokens are marked "ignore" and never processed
                         String replacedString = "";
                         if (tokenList.get(i).lexeme.equals("int")) {
                             replacedString = tokenList.get(i).lexeme.replace("int", "");
                             pythonText += replacedString;
                         }
+                        break;
+                    case ELSE:
+                        pythonText += tokenList.get(i).lexeme + ":";
+                        break;
+                    case ELSE_IF:
+                        //Add "elif" rather than "else if"
+                        pythonText += "elif";
+                        i++;
+
+                        while (tokenList.get(i).token != Interpreter.tokens.L_BRCE){
+                            pythonText += tokenList.get(i).lexeme;
+                            i++;
+                        }
+                        //Skip the left brace following the if conditional
+                        i++;
+                        pythonText += tokenList.get(i).lexeme + ":";
+                        break;
+                    case IF:
+                        while (tokenList.get(i).token != Interpreter.tokens.L_BRCE){
+                            pythonText += tokenList.get(i).lexeme;
+                            i++;
+                        }
+                        //Skip the right brace following the if conditional
+                        i++;
+                        pythonText += tokenList.get(i).lexeme + ":";
                         break;
                     case PRINT: //Handling variable wrapping in strings.
                         i = printHandler(i);
@@ -177,10 +232,6 @@ public class Converter {
 
                         break;
                     case STRING:
-//                        System.out.println("STRING!!! -> " + tokenList.get(i).lexeme);
-//                        tokenList.get(i).lexeme = cleanString(tokenList.get(i).lexeme);
-//                        tokenList.get(i).lexeme = tokenList.get(i).lexeme.replace('"', ' ');
-
                         pythonText += tokenList.get(i).lexeme;
                         break;
 
@@ -191,7 +242,8 @@ public class Converter {
                 }
             }
         }
-        pythonText += "\nif __name__ == \"__main__\": \n\tmain()";
+        if (driverPresent)
+            pythonText += "\nif __name__ == \"__main__\": \n\tmain()";
         System.out.println(pythonText);
         gui.EP.setText(pythonText);
         //checkAccuracy(pythonText);
@@ -348,7 +400,7 @@ public class Converter {
         pythonText += "print(f\"";
         index++;
         while (tokenList.get(index).token != Interpreter.tokens.R_PAREN) {
-            if (tokenList.get(index).token == Interpreter.tokens.IDENTIFIER) {
+            if (tokenList.get(index).token == Interpreter.tokens.IDENTIFIER || tokenList.get(index).token == Interpreter.tokens.ARRAY_REFERENCE) {
                 tokenList.get(index).lexeme = "{" + tokenList.get(index).lexeme + "}";
                 pythonText += tokenList.get(index).lexeme;
             } else if (tokenList.get(index).token == Interpreter.tokens.STRING) {
