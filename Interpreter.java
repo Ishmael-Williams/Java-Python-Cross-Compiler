@@ -467,6 +467,7 @@ public class Interpreter {
 //        contents = contents.replace("}", "");
 //        contents = contents.replace(";", "");
 
+
         Path cleanFile = Path.of("Test Programs/cleanFile.txt");
         Files.writeString(cleanFile, contents);
         reader = new FileReader("Test Programs/cleanFile.txt");

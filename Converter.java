@@ -15,6 +15,7 @@ public class Converter {
         Converter.gui = gui;
     }
 
+
     static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList) throws IOException {
         tokenList = oldTokenList;
         pythonText = "";
