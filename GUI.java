@@ -67,9 +67,12 @@ public class GUI extends Application {
                 " You may also load existing Java files.");
 //        Font font = new Font("Calibri", EJ.getFont().getSize() + 20);
 //        EJ.setFont(font);
+        EJ.setWrapText(true);
+
         EP.setPrefColumnCount(45);
         EP.setPrefRowCount(25);
         EP.setPromptText("Python code is printed here as output.");
+        EP.setWrapText(true);
 
         /***********GridPane Declaration*****************/
         /***********Define the architecture of the pane**/
