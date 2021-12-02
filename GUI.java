@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,14 +61,14 @@ public class GUI extends Application {
         /***********TextArea Declarations***************/
 
 
-        EJ.setPrefColumnCount(50);
-        EJ.setPrefRowCount(50);
+        EJ.setPrefColumnCount(45);
+        EJ.setPrefRowCount(25);
         EJ.setPromptText("Enter Java code here." +
                 " You may also load existing Java files.");
 //        Font font = new Font("Calibri", EJ.getFont().getSize() + 20);
 //        EJ.setFont(font);
-        EP.setPrefColumnCount(50);
-        EP.setPrefRowCount(50);
+        EP.setPrefColumnCount(45);
+        EP.setPrefRowCount(25);
         EP.setPromptText("Python code is printed here as output.");
 
         /***********GridPane Declaration*****************/
@@ -84,13 +85,19 @@ public class GUI extends Application {
         root.add(SJ, 0, 2);
         root.add(compile, 0,3);
         //root.add(SP, 3,1);
-//        root.add(settings, 0, 4);
+        root.add(settings, 0, 4);
 //        root.add(accuracy, 0, 5);
 
-        Scene scene = new Scene(root, 1650, 950);
+//to allow dynamic window sizing. width-15 and height-80 is to allow the title bar to be displayed properly
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
 
-        //Statement to change current theme of application
-        scene.getStylesheets().add("dark_mode.css");
+//        Scene scene = new Scene(root, 1000, 750);
+//        Scene scene = new Scene(root, 1550, 900);
+          Scene scene = new Scene(root, width-15, height-80);
+          //Statement to change current theme of application
+          scene.getStylesheets().add("dark_mode.css");
 
         primaryStage.setScene(scene);
         primaryStage.show();
