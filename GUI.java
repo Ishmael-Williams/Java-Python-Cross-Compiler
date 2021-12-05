@@ -62,13 +62,13 @@ public class GUI extends Application {
 
 
         EJ.setPrefColumnCount(45);
-        EJ.setPrefRowCount(25);
+        EJ.setPrefRowCount(35);
         EJ.setPromptText("Enter Java code here." +
                 " You may also load existing Java files.");
 //        Font font = new Font("Calibri", EJ.getFont().getSize() + 20);
 //        EJ.setFont(font);
         EP.setPrefColumnCount(45);
-        EP.setPrefRowCount(25);
+        EP.setPrefRowCount(35);
         EP.setPromptText("Python code is printed here as output.");
 
         /***********GridPane Declaration*****************/
@@ -85,7 +85,7 @@ public class GUI extends Application {
         root.add(SJ, 0, 2);
         root.add(compile, 0,3);
         //root.add(SP, 3,1);
-        root.add(settings, 0, 4);
+//        root.add(settings, 0, 4);
 //        root.add(accuracy, 0, 5);
 
 //to allow dynamic window sizing. width-15 and height-80 is to allow the title bar to be displayed properly
@@ -93,9 +93,8 @@ public class GUI extends Application {
         int width = gd.getDisplayMode().getWidth();
         int height = gd.getDisplayMode().getHeight();
 
-//        Scene scene = new Scene(root, 1000, 750);
-//        Scene scene = new Scene(root, 1550, 900);
-          Scene scene = new Scene(root, width-15, height-80);
+        Scene scene = new Scene(root, 1550, 900);
+//          Scene scene = new Scene(root, width-15, height-80);
           //Statement to change current theme of application
           scene.getStylesheets().add("dark_mode.css");
 
@@ -110,7 +109,13 @@ public class GUI extends Application {
                     EJ.setText("");
                     FileChooser fc = new FileChooser();
                     fc.setTitle("Load Java file");
-                    fc.setInitialDirectory(new File("Test Programs"));
+                    File initialdirectory = new File("C:\\Users\\half-\\OneDrive\\Desktop\\Test cases");
+                    if (initialdirectory.exists()){
+                        fc.setInitialDirectory(new File("C:\\Users\\half-\\OneDrive\\Desktop\\Test cases"));
+                    } else if(new File("Test Programs").exists()){
+                        fc.setInitialDirectory(new File("Test Programs"));
+                    }
+
                     inputFile = fc.showOpenDialog(primaryStage);
                     Interpreter.file = inputFile;
 

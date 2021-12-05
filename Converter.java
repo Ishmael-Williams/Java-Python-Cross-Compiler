@@ -16,7 +16,7 @@ public class Converter {
     }
 
 
-    static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList) throws IOException {
+    static public void runConverter(ArrayList<Interpreter.tokenInfo> oldTokenList) throws IOException   {
         tokenList = oldTokenList;
         pythonText = "";
         boolean driverPresent = false;
@@ -68,7 +68,13 @@ public class Converter {
                             pythonText += " = ";
                             break;
                         }
+                    case COMMENT:
+                        pythonText += "#" + tokenList.get(i).lexeme.substring(2);
+                        break;
                     case DATA_TYPE:
+                        break;
+                    case DECREMENT:
+                        pythonText += "-=1";
                         break;
                     case DRIVER:
                         driverPresent = true;
@@ -114,6 +120,10 @@ public class Converter {
                         }
                         //Skips many tokens that were creating excess new_lines
                         break;
+                    case INCREMENT:
+                        //For the incrementation operation in Java, ++ is not valid and is replaced by +=1
+                        pythonText += "+=1";
+                        break;
                     case L_PAREN:
                         /*
                           1. Ignores left parentheses unless they're used for casting
@@ -124,13 +134,16 @@ public class Converter {
                         String data_type = "";
                         if (tokenList.get(i+1).token == Interpreter.tokens.DECLARATION) {
                             data_type = tokenList.get(i+1).lexeme;
-
                             i += 3;
                             while (tokenList.get(i).token != Interpreter.tokens.IDENTIFIER){
                                 i++;
                             }
                             pythonText += data_type + "(" + tokenList.get(i).lexeme + ")";
+                            break;
                         }
+                        pythonText += tokenList.get(i).lexeme;
+
+
                         break;
                     case LENGTH_FUNC:
                         int size = findSize(tokenList.get(i - 1).lexeme);
@@ -175,9 +188,18 @@ public class Converter {
                         break;
                     case SPACE:
                         //Skip the current space if the last lexeme was ignored
-                        if (tokenList.get(i-1).ignore == true)
+                        if (i == 0)
+                            continue;
+                        else if(tokenList.get(i - 1).ignore == true)
                             continue;
                         pythonText += tokenList.get(i).lexeme;
+                        break;
+                    case WHILE:
+                        while(tokenList.get(i+1).token != Interpreter.tokens.L_BRCE){
+                            pythonText += tokenList.get(i).lexeme;
+                            i++;
+                        }
+                        pythonText += tokenList.get(i).lexeme + ":";
                         break;
                 }
             } else {
@@ -204,7 +226,8 @@ public class Converter {
                         }
                         //Skip the left brace following the if conditional
                         i++;
-                        pythonText += tokenList.get(i).lexeme + ":";
+                        if (i < tokenList.size())
+                            pythonText += ":" + tokenList.get(i).lexeme;
                         break;
                     case IF:
                         while (tokenList.get(i).token != Interpreter.tokens.L_BRCE){
@@ -213,24 +236,10 @@ public class Converter {
                         }
                         //Skip the right brace following the if conditional
                         i++;
-                        pythonText += tokenList.get(i).lexeme + ":";
+                        pythonText += ":" + tokenList.get(i).lexeme;
                         break;
                     case PRINT: //Handling variable wrapping in strings.
                         i = printHandler(i);
-//                        tokenList.get(i).lexeme = "\t" + tokenList.get(i).lexeme;
-//                        try {
-//                            if (tokenList.get(i + 1).token.equals(Interpreter.tokens.L_PAREN)
-//                                    && tokenList.get(i + 2).token.equals(Interpreter.tokens.STRING)) {
-//                                int startIndex = i +2; //index of beginning of string in the tokenList
-//                                tokenList = new ArrayList<Interpreter.tokenInfo> (variableWrap(tokenList, startIndex));
-//                                pythonText += tokenList.get(i).lexeme;
-//                            }
-//                        }catch(ArrayIndexOutOfBoundsException OOB){
-//                            //End of array was reached.
-//                            System.out.println(OOB.getMessage());
-//                            break;
-//                        }
-
                         break;
                     case STRING:
                         pythonText += tokenList.get(i).lexeme;

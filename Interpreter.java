@@ -65,13 +65,13 @@ public class Interpreter {
      */
     public enum tokens {
         ADD_OP, ARRAY_DECLARATION, ARRAY_GENERIC, ARRAY_REFERENCE, ASSIGN_OP,
-        PRINT, CLASS, CR, COMMA,
-        DATA_TYPE, DECLARATION, DIV_OP, DRIVER, //"DRIVER" refers to main()
+        PRINT, CLASS, CR, COMMENT, COMMA,
+        DATA_TYPE, DECLARATION, DECREMENT, DIV_OP, DOUBLE, DRIVER, //"DRIVER" refers to main()
         ELSE, ELSE_IF, EQUALS_OP,
-        FOR, FUNCTION_DECLARATION,
+        FOR, FUNCTION_CALL,
         GREATER_THAN, GREATER_THAN_OR_EQUAL,
         HASH,
-        IDENTIFIER, IF, IMPORT, INTEGER,
+        IDENTIFIER, IF, IMPORT, INCREMENT, INTEGER,
         L_BRCE, L_BRCT, LENGTH_FUNC, L_PAREN, LESS_THAN, lESS_THAN_OR_EQUAL,
         MULT_OP,
         NEW, NEW_LINE, NEW_TAB, NEXT_INT,
@@ -99,10 +99,9 @@ public class Interpreter {
 
             switch (charClass) {
                 case DIGIT:
-                    //A condition must still be added that accounts for decimals.
                     token = tokens.INTEGER;
 
-                    if (isDelimiter(foreChar)){
+                    if (isDelimiter(foreChar) && foreChar != '.'){
                         addTokenObject(token, lexeme);
                         break;
                     } else {
@@ -112,6 +111,8 @@ public class Interpreter {
                             if (isWhitespace(foreChar) || foreChar == ';' || foreChar == ',' || foreChar == '}') {
                                 addTokenObject(token, lexeme);
                                 break;
+                            } else if(currentChar =='.'){
+                                token = tokens.DOUBLE;
                             }
                         }
                     }
@@ -154,14 +155,14 @@ public class Interpreter {
                                 addTokenObject(token, lexeme);
                                 tokenList.get(tokenList.size() - 1).special = true;
                             } else {
-                                token = tokens.UNKNOWN;
+                                token = tokens.FUNCTION_CALL;
                                 addTokenObject(token, lexeme);
                             }
 
                             //After processing the name and token for the function call up to this point, process the "(" the system is in possession of.
-                            lookup();
-                            lexeme = Character.toString(currentChar);
-                            addTokenObject(token, lexeme);
+//                            lookup();
+//                            lexeme = Character.toString(currentChar);
+//                            addTokenObject(token, lexeme);
                             break;
                         } else if (foreChar == '[' && tokenList.get(tokenList.size() - 2).token == tokens.NEW) {
                             /*3 possible cases for encountering a "[" character:
@@ -233,13 +234,32 @@ public class Interpreter {
                         //Check for classes and objects between periods, such as
                         //"array.length" where we want to collect and tag "array"
                         if (foreChar == '.'){
-                            token = tokens.IDENTIFIER;
-                            addTokenObject(token, lexeme);
+                            token = tokens.FUNCTION_CALL;
+                            while(!isDelimiter(foreChar)){
+                                getChar();
+                                addChar();
+                            }
+                            if (lexeme.contains("print")){
+                                token = tokens.PRINT;
+                                lexeme = "print";
+                                addTokenObject(token, lexeme);
+                            } else if(lexeme.contains("nextInt")) {
+                                lexeme = "nextInt";
+                                token = tokens.NEXT_INT;
+                                addTokenObject(token, lexeme);
+                                tokenList.get(tokenList.size()-1).special = true;
+                            } else{
+                                while (!isDelimiter(foreChar) && foreChar != -1){
+                                    getChar();
+                                    addChar();
+                                }
+                                addTokenObject(token, lexeme);
+                            }
                             /* Tokens preceding a period are ignored for now but later can
                              * be retrieved for special uses, such as when a lexeme's name "arrayName" precedes
                              * ".length" and must be collected to write the natural python conversion "len(arrayName)"
                              */
-                            tokenList.get(tokenList.size()-1).ignore = true;
+//                            tokenList.get(tokenList.size()-1).ignore = true;
                             break;
                         }
 
@@ -263,8 +283,12 @@ public class Interpreter {
                         } else if (Objects.equals(lexeme, "while")) {
                             token = tokens.WHILE;
                             addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
                             break;
-                        } else if ((Objects.equals(lexeme, "int") || Objects.equals(lexeme, "float")) && (foreChar == ' ' || foreChar == ')')){
+                        } else if ((foreChar == ' ' || foreChar == ')') &&
+                                   (Objects.equals(lexeme, "int") || Objects.equals(lexeme, "float") ||
+                                   Objects.equals(lexeme, "String") || Objects.equals(lexeme, "long") ||
+                                   Objects.equals(lexeme, "double") || Objects.equals(lexeme, "boolean") || Objects.equals(lexeme, "char"))){
                             token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
                             tokenList.get(tokenList.size()-1).ignore = true;
@@ -281,15 +305,12 @@ public class Interpreter {
                             tokenList.get(tokenList.size() - 1).special = true;
                             break;
                         } else if (Objects.equals(lexeme, "String") && foreChar == ' ') {
-                            token = tokens.DATA_TYPE;
+                            token = tokens.DECLARATION;
                             addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).ignore = true;
                             break;
                         } else if (Objects.equals(lexeme, "args")) {
                             token = tokens.PARAMETER;
-                            addTokenObject(token, lexeme);
-                            break;
-                        } else if (Objects.equals(lexeme, "print")) {
-                            token = tokens.PRINT;
                             addTokenObject(token, lexeme);
                             break;
                         } else if (Objects.equals(lexeme, "import")) {
@@ -347,6 +368,30 @@ public class Interpreter {
                             addChar();
                             addTokenObject(token, lexeme);
                             break;
+                        } else if(token == tokens.ADD_OP && foreChar == '+'){
+                            token = tokens.INCREMENT;
+                            getChar();
+                            addChar();
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size() - 1).special = true;
+                            break;
+                        } else if(token == tokens.SUB_OP && foreChar == '-'){
+                            token = tokens.DECREMENT;
+                            getChar();
+                            addChar();
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size() - 1).special = true;
+                            break;
+                        } else if(token == tokens.DIV_OP && foreChar == '/'){
+                            //Lexeme is an in-line comment
+                            token = tokens.COMMENT;
+                            while (foreChar != '\n' && foreChar != -1){
+                                getChar();
+                                addChar();
+                            }
+                            addTokenObject(token, lexeme);
+                            tokenList.get(tokenList.size()-1).special = true;
+                            break;
                         }
 
                         //Set conditions for special tokens
@@ -359,8 +404,6 @@ public class Interpreter {
                             tokenList.get(tokenList.size() - 1).ignore = true;
                         else if (token == tokens.ASSIGN_OP)
                             tokenList.get(tokenList.size() - 1).special = true;
-                        else if (token == tokens.PERIOD)
-                            tokenList.get(tokenList.size() - 1).ignore = true;
                         else if (token == tokens.CR)
                             tokenList.get(tokenList.size()-1).ignore = true;
                         else if (token == tokens.SPACE)
@@ -446,7 +489,7 @@ public class Interpreter {
         boolean isDelimiter = false;
         switch (foreChar) {
             case '=', '+', ',', ';', '-', '/', '*', '(', ')',
-                 '{', '}', '[', ']', ' ', '#', '.', '\r', '\n',
+                 '{', '}', '[', ']', ' ', '#', '\r', '\n',
                  '\t' -> isDelimiter = true;
         }
         return isDelimiter;
